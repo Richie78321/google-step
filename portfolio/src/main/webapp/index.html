@@ -9,7 +9,8 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    <script type="text/javascript" src="./script.js"></script>
+    <script type="text/javascript" src="./js/script.js"></script>
+    <script type="text/javascript" src="./js/activities.js"></script>
   </head>
   <body onload="startActivitiesScroll()">
     <div class="container">
@@ -33,14 +34,15 @@
         <hr />
         I'm always doing something:<br />
         <span id="activity-scroller" class="text-primary">Like waiting for GitHub to respond...</span>
-        <footer class="blockquote-footer">Pulled from my <a href="https://github.com/Richie78321">GitHub</a></footer>
+        <footer class="blockquote-footer">
+          Pulled from my <a href="https://github.com/Richie78321">GitHub</a>
+          <button id="activity-scoller-toggle" class="ml-1 btn btn-sm btm-light" onclick="toggleActivityScroll()">Pause this</button>
+        </footer>
         <hr />
       </div>
 
-      <br>
-      <br>
       <div class="mt-4 card w-50 mx-auto">
-        <button class="btn btn-primary" onClick="addRandomFact()">Get a Random Fact!</button>
+        <button class="btn btn-primary" onclick="addRandomFact()">Get a Random Fact!</button>
         <div class="card-body">
           <h4 id="fact-container"></h4>
         </div>
