@@ -16,7 +16,6 @@
  * Adds a random fact to the page.
  */
 function addRandomFact() {
-  // TODO: Check if this adheres to style
   const facts = [
     "I really like reinforcement learning, particularly genetic algorithms!",
     "I went to Peru last summer and saw Machu Picchu!",
@@ -30,4 +29,31 @@ function addRandomFact() {
   // Add it to the page
   const factContainer = document.getElementById('fact-container');
   factContainer.innerText = fact;
+}
+
+/**
+ * Gathers repos from GitHub and scrolls through them in the About Me section
+ */
+async function startActivitiesScroll() {
+  let repos = await fetch("https://api.github.com/users/Richie78321/repos")
+    .then(res => res.json());
+  repos = repos.filter(repo => repo.description && repo.description.length !== 0);
+
+  activityScroll(repos, 0);
+}
+
+/**
+ * Changes to next GitHub repo
+ */
+function activityScroll(repos, index) {
+  const nextTimeout = 2500;
+  const repo = repos[index];
+
+  const activityContainer = document.getElementById('activity-scroller');
+  activityContainer.innerText = repo.description;
+
+  // Increment index and wait to update scroller
+  index++;
+  index %= repos.length;
+  setTimeout(() => { activityScroll(repos, index); }, nextTimeout);
 }

@@ -11,9 +11,10 @@
 
     <script type="text/javascript" src="./script.js"></script>
   </head>
-  <body>
+  <body onload="startActivitiesScroll()">
     <div class="container">
-      <div class="row mt-4">
+
+      <div class="row mt-4 no-gutters">
         <div class="col-md-2 align-self-center">
           <img class="rounded img-fluid" src="./images/me.jpg"></img>
         </div>
@@ -23,11 +24,21 @@
       </div>
       <hr class="mb-4" />
 
-      <h3>Welcome to my portfolio!</h3>
-      <p> It is very basic at the moment. Please bear with me as I get used to this!</p>
-      <h3>About me:</h3>
-      <p>I am a computer science student currently studying at the University of Pittsburgh. I am a big fan of <i>learning by doing</i>, and I have taught myself a lot through personal projects over the past four years.</p>
+      <h3>About me</h3>
+      <p><i>tldr;</i> I am a computer science student currently studying at the University of Pittsburgh.</p>
+      <p>I think my most defining characteristic is that I am a big fan of learning by doing. Over the past four years, I have been
+      learning computer science through personal projects that span a lot of different disciplines.</p>
 
+      <div class="mx-4">
+        <hr />
+        I'm always doing something:<br />
+        <span id="activity-scroller" class="text-primary">Like waiting for GitHub to respond...</span>
+        <footer class="blockquote-footer">Pulled from my <a href="https://github.com/Richie78321">GitHub</a></footer>
+        <hr />
+      </div>
+
+      <br>
+      <br>
       <div class="mt-4 card w-50 mx-auto">
         <button class="btn btn-primary" onClick="addRandomFact()">Get a Random Fact!</button>
         <div class="card-body">
