@@ -1,18 +1,39 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
-    <title>My Portfolio</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Richie Goulazian - Portfolio</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <script type="text/javascript" src="./script.js"></script>
   </head>
   <body>
-    <div id="content">
-      <h1>My Portfolio</h1>
-      <p>This is my portfolio.</p>
-      <p>Click here to get a random message:</p>
-      <button onclick="addRandomGreeting()">Hello</button>
-      <div id="greeting-container"></div>
+    <div class="container">
+      <div class="row mt-4">
+        <div class="col-md-2 align-self-center">
+          <img class="rounded img-fluid" src="./images/me.jpg"></img>
+        </div>
+        <div class="col-md-10 align-self-center">
+          <h1 class="display-1 text-center my-auto">Richie Goulazian</h1>
+        </div>
+      </div>
+      <hr class="mb-4" />
+
+      <h3>Welcome to my portfolio!</h3>
+      <p> It is very basic at the moment. Please bear with me as I get used to this!</p>
+      <h3>About me:</h3>
+      <p>I am a computer science student currently studying at the University of Pittsburgh. I am a big fan of <i>learning by doing</i>, and I have taught myself a lot through personal projects over the past four years.</p>
+
+      <div class="mt-4 card w-50 mx-auto">
+        <button class="btn btn-primary" onClick="addRandomFact()">Get a Random Fact!</button>
+        <div class="card-body">
+          <h4 id="fact-container"></h4>
+        </div>
+      </div>
     </div>
   </body>
 </html>
