@@ -1,6 +1,6 @@
 let scroller = null;
 /**
- * Gathers repos from GitHub and scrolls through them in the About Me section
+ * Gathers repos from GitHub and scrolls through them in the About Me section.
  */
 async function startActivitiesScroll() {
   let repos = await fetch("https://api.github.com/users/Richie78321/repos")
@@ -21,7 +21,7 @@ class Scroller {
    */
   constructor(repos) {
     /**
-     * Collection of user GitHub repos
+     * Collection of user GitHub repos.
      * @type {Array<Object>}
      */
     this.repos = repos;
@@ -34,7 +34,7 @@ class Scroller {
   }
 
   /**
-   * Increments the scrolling activity 
+   * Increments the scrolling activity.
    * @private
    */
   _scrollActivity() {
@@ -52,7 +52,7 @@ class Scroller {
   }
 
   /**
-   * Starts the scrolling effect
+   * Starts the scrolling effect.
    */
   start() {
     if (this.isPaused()) {
@@ -62,7 +62,7 @@ class Scroller {
 
 
   /**
-   * Pauses the scrolling effect 
+   * Pauses the scrolling effect.
    */
   pause() {
     if (!this.isPaused()) {
@@ -72,7 +72,7 @@ class Scroller {
   }
 
   /**
-   * Determines if the scroller is currently paused
+   * Determines if the scroller is currently paused.
    * @returns {boolean}
    */
   isPaused() {
@@ -81,7 +81,7 @@ class Scroller {
 }
 
 /**
- * Toggles activity scrolling feature
+ * Toggles activity scrolling feature.
  */
 function toggleActivityScroll() {
   const toggleButton = document.getElementById('activity-scoller-toggle');
