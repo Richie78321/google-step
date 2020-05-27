@@ -1,18 +1,53 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
-    <title>My Portfolio</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Richie Goulazian - Portfolio</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <script type="text/javascript" src="./js/script.js"></script>
+    <script type="text/javascript" src="./js/activities.js"></script>
   </head>
-  <body>
-    <div id="content">
-      <h1>My Portfolio</h1>
-      <p>This is my portfolio.</p>
-      <p>Click here to get a random message:</p>
-      <button onclick="addRandomGreeting()">Hello</button>
-      <div id="greeting-container"></div>
+  <body onload="startActivitiesScroll()">
+    <div class="container">
+
+      <div class="row mt-4 no-gutters">
+        <div class="col-md-2 align-self-center">
+          <img class="rounded img-fluid" src="./images/me.jpg"></img>
+        </div>
+        <div class="col-md-10 align-self-center">
+          <h1 class="display-1 text-center my-auto">Richie Goulazian</h1>
+        </div>
+      </div>
+      <hr class="mb-4" />
+
+      <h3>About me</h3>
+      <p><i>tldr;</i> I am a computer science student currently studying at the University of Pittsburgh.</p>
+      <p>I think my most defining characteristic is that I am a big fan of learning by doing. Over the past four years, I have been
+      learning computer science through personal projects that span a lot of different disciplines.</p>
+
+      <div class="mx-4">
+        <hr />
+        I'm always doing something:<br />
+        <span id="activity-scroller" class="text-primary">Like waiting for GitHub to respond...</span>
+        <footer class="blockquote-footer">
+          Pulled from my <a href="https://github.com/Richie78321">GitHub</a>
+          <button id="activity-scoller-toggle" class="ml-1 btn btn-sm btm-light" onclick="toggleActivityScroll()">Pause this</button>
+        </footer>
+        <hr />
+      </div>
+
+      <div class="mt-4 card w-50 mx-auto">
+        <button class="btn btn-primary" onclick="addRandomFact()">Get a Random Fact!</button>
+        <div class="card-body">
+          <h4 id="fact-container"></h4>
+        </div>
+      </div>
+
     </div>
   </body>
 </html>
