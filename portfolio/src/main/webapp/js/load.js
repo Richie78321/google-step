@@ -1,4 +1,12 @@
 /**
+ * Starts necessary JS after DOM has loaded
+ */
+function onLoad() {
+  startActivitiesScroll();
+  loadFreeze();
+}
+
+/**
  * Initializes freezeframe from CDN
  */
 function loadFreeze() {
@@ -6,5 +14,3 @@ function loadFreeze() {
 
   freezeframe.stop();
 }
-
-loadFreeze();
