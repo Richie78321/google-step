@@ -9,10 +9,16 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    <script type="text/javascript" src="./js/script.js"></script>
-    <script type="text/javascript" src="./js/activities.js"></script>
+    <link rel="stylesheet" href="./css/master.css">
+
+    <!-- Freezeframe.js https://github.com/ctrl-freaks/freezeframe.js/tree/master/packages/freezeframe -->
+    <script src="https://unpkg.com/freezeframe/dist/freezeframe.min.js"></script>
+
+    <script src="./js/load.js"></script>
+    <script src="./js/script.js"></script>
+    <script src="./js/activities.js"></script>
   </head>
-  <body onload="startActivitiesScroll()">
+  <body onload="onLoad()">
     <div class="container">
 
       <div class="row mt-4 no-gutters">
@@ -46,12 +52,14 @@
       and I really believe in it. I have a feeling in the next few years virtual reality is going to be hitting the mainstream.</p>
 
       <h3>Some of my favorite projects</h3>
-      <p>If you look at my <a href="https://github.com/Richie78321">GitHub</a> you'll very likely find a jumbled mess, so here
+      <p class="mb-0">If you look at my <a href="https://github.com/Richie78321">GitHub</a> you'll very likely find a jumbled mess, so here
       is a curated list of some of the projects I am most fond of... in no particular order.</p>
+      <small class="text-muted">Protip: highlight over the images to see them in motion!</small>
 
       <div class="row">
         <div class="col-md-4 mb-2">
-          <div class="card h-100">
+          <div class="project-card card h-100">
+            <img src="./images/genetic-fish-tank.gif" alt="Image of the virtual fish" class="freezeframe card-img-top">
             <div class="card-body">
               <h5 class="card-title text-primary">Genetic Fish Tank</h5>
               <p class="card-text">A virtual fish tank with virtual fish that evolve to survive in real time. They learn to search for food
@@ -60,7 +68,8 @@
           </div>
         </div>
         <div class="col-md-4 mb-2">
-          <div class="card h-100">
+          <div class="project-card card h-100">
+            <img src="./images/impulse-physics.gif" alt="Image of the physics engine in action" class="freezeframe card-img-top">
             <div class="card-body">
               <h5 class="card-title text-primary">Impulse Physics Engine</h5>
               <p class="card-text">A 2D physics engine that can simulate the interactions of arbitrary convex polygons.
@@ -69,7 +78,8 @@
           </div>
         </div>
         <div class="col-md-4 mb-2">
-          <div class="card h-100">
+          <div class="project-card card h-100">
+            <img src="./images/space-farmer.gif" alt="Image of the game" class="freezeframe card-img-top">
             <div class="card-body">
               <h5 class="card-title text-primary">Space Farmer</h5>
               <p class="card-text">One of the first games I ever made, and one of the greatest learning experiences.
@@ -78,9 +88,10 @@
           </div>
         </div>
       </div>
-      <div class="row">
+      <div class="row mb-3">
         <div class="col-md-4 mb-2">
-          <div class="card h-100">
+          <div class="project-card card h-100">
+            <img src="./images/craft-war.gif" alt="Image of the game" class="freezeframe card-img-top">
             <div class="card-body">
               <h5 class="card-title text-primary">Craft War</h5>
               <p class="card-text">A 2D "Minecraft Clone" that features a day-night system, crafting mechanics, and caves!</p>
@@ -88,7 +99,8 @@
           </div>
         </div>
         <div class="col-md-4 mb-2">
-          <div class="card h-100">
+          <div class="project-card card h-100">
+            <img src="./images/fighter-game.gif" alt="Image of the game" class="freezeframe card-img-top">
             <div class="card-body">
               <h5 class="card-title text-primary">Fighter Game</h5>
               <p class="card-text">A 2D multiplayer arena-fighting game. It's integrated with an early version of my physics engine,
@@ -97,10 +109,11 @@
           </div>
         </div>
         <div class="col-md-4 mb-2">
-          <div class="card h-100">
+          <div class="project-card card h-100">
+            <img src="./images/maze-ant.gif" alt="Image of the ant moving through the maze" class="freezeframe card-img-top">
             <div class="card-body">
               <h5 class="card-title text-primary">Maze Ant</h5>
-              <p class="card-text">A little triangle ant guy that uses his raytracing "antennae" to traverse random mazes!
+              <p class="card-text">A little ant guy that uses his raytracing "antennae" to traverse random mazes!
               He learned to do this with my modular genetics library!</p>
             </div>
           </div>
