@@ -86,6 +86,9 @@ class Tank {
     this._balls = [];
   }
 
+  /**
+   * Updates the balls in the tank by one frame.
+   */
   update() {
     this._balls.forEach((ball, i) => {
       // Record previous pos to update spatial hashing
@@ -95,6 +98,9 @@ class Tank {
     });
   }
 
+  /**
+   * Draws the balls in the tank.
+   */
   draw() {
     this._balls.forEach((ball, i) => ball.draw(this));
   }
@@ -103,7 +109,7 @@ class Tank {
    * Adds a ball to the tank.
    * @param {Ball} ball
    */
-  addball(ball) {
+  addBall(ball) {
     this._balls.push(ball);
     this._placeInHash(this._getSpatialHashPos(ball.pos), ball);
   }
@@ -165,8 +171,48 @@ class Tank {
    * @return {p5.Vector}
    * @private
    */
-  _getSpacialHashPos(pos) {
+  _getSpatialHashPos(pos) {
     return createVector(Math.floor(pos.x / this.staticDiameter),
       Math.floor(pos.y / this.staticDiameter));
+  }
+
+  /**
+   * Get balls that could be affected by static effect. This is where spatial
+   * hashing is used to optimize.
+   * @param {Ball} ball
+   * @return {Array<Ball>}
+   */
+  getNearby(ball) {
+    // Approximate circular viewing limits to a square.
+    // This approximation holds because the spacial hash is divided into
+    // the diameter of the viewing circle, such that the circle can only
+    // ever be in four squares at once.
+
+    const x_min =
+      p5.Vector.sub(ball.pos, createVector(this.staticRadius, 0));
+    const y_min =
+      p5.Vector.sub(ball.pos, createVector(0, this.staticRadius));
+
+    const x_min_hash = this._getSpatialHashPos(x_min).x;
+    const y_min_hash = this._getSpatialHashPos(y_min).y;
+
+    let nearbyBalls = [];
+    for (let i = x_min_hash; i < x_min_hash + 2; i++) {
+      for (let j = y_min_hash; j < y_min_hash + 2; j++) {
+        const hashCollection = this._spatialHash[i + '-' + j];
+        if (hashCollection) {
+          nearbyBalls = nearbyBalls.concat(hashCollection);
+        }
+      }
+    }
+
+    const selfIndex = nearbyBalls.indexOf(ball);
+    if (selfIndex !== -1) {
+      nearbyBalls.splice(selfIndex, 1);
+    }
+
+    return nearbyBalls.filter((nearbyBall) => {
+      return p5.Vector.dist(ball.pos, nearbyBall.pos) <= this.staticRadius;
+    });
   }
 }
