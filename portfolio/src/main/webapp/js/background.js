@@ -1,15 +1,15 @@
 const HEIGHT_TO_WIDTH = 0.3;
 /**
- * Runs initial set up of the game and game canvas.
+ * Runs initial set up of the background and background canvas.
  */
 function setup() {
   const FRAMERATE = 60;
   const backgroundContainer = document.getElementById("background-container");
 
-  const gameCanvas =
+  const backgroundCanvas =
     createCanvas(backgroundContainer.clientWidth,
       backgroundContainer.clientWidth * HEIGHT_TO_WIDTH);
-  gameCanvas.parent("background-container");
+  backgroundCanvas.parent("background-container");
 
   frameRate(FRAMERATE);
 
@@ -17,6 +17,9 @@ function setup() {
 }
 
 let ballTank;
+/**
+ * Initializes a tank for the background.
+ */
 function initTank() {
   const EFFECT_RAD_TO_WIDTH = 0.1;
   const BALL_SIZE_TO_WIDTH = 0.01;
@@ -42,7 +45,7 @@ function initTank() {
  * Resizes the canvas when the window is resized.
  */
 function windowResized() {
-  const canvasContainer = document.getElementById("canvas-container");
+  const canvasContainer = document.getElementById("background-container");
   resizeCanvas(canvasContainer.clientWidth,
     canvasContainer.clientWidth * HEIGHT_TO_WIDTH);
 }
