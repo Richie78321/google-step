@@ -188,17 +188,17 @@ class Tank {
     // the diameter of the viewing circle, such that the circle can only
     // ever be in four squares at once.
 
-    const x_min =
+    const xMin =
       p5.Vector.sub(ball.pos, createVector(this.staticRadius, 0));
-    const y_min =
+    const yMin =
       p5.Vector.sub(ball.pos, createVector(0, this.staticRadius));
 
-    const x_min_hash = this._getSpatialHashPos(x_min).x;
-    const y_min_hash = this._getSpatialHashPos(y_min).y;
+    const xMinHash = this._getSpatialHashPos(xMin).x;
+    const yMinHash = this._getSpatialHashPos(yMin).y;
 
     let nearbyBalls = [];
-    for (let i = x_min_hash; i < x_min_hash + 2; i++) {
-      for (let j = y_min_hash; j < y_min_hash + 2; j++) {
+    for (let i = xMinHash; i < xMinHash + 2; i++) {
+      for (let j = yMinHash; j < yMinHash + 2; j++) {
         const hashCollection = this._spatialHash[i + '-' + j];
         if (hashCollection) {
           nearbyBalls = nearbyBalls.concat(hashCollection);
@@ -215,4 +215,11 @@ class Tank {
       return p5.Vector.dist(ball.pos, nearbyBall.pos) <= this.staticRadius;
     });
   }
+}
+
+/**
+ * A statically-charged ball that applies forces to other balls and bounces.
+ */
+class Ball {
+
 }
