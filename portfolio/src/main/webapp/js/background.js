@@ -86,11 +86,24 @@ class Tank {
     this._balls = [];
   }
 
+  update() {
+    this._balls.forEach((ball, i) => {
+      // Record previous pos to update spatial hashing
+      const prevPos = createVector(ball.pos.x, ball.pos.y);
+      ball.update(this);
+      this._updateHash(prevPos, ball);
+    });
+  }
+
+  draw() {
+    this._balls.forEach((ball, i) => ball.draw(this));
+  }
+
   /**
    * Adds a ball to the tank.
    * @param {Ball} ball
    */
-  addBoid(ball) {
+  addball(ball) {
     this._balls.push(ball);
     this._placeInHash(this._getSpatialHashPos(ball.pos), ball);
   }
