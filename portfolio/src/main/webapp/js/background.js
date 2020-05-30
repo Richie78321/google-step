@@ -121,12 +121,7 @@ class Tank {
    * Updates the balls in the tank by one frame.
    */
   update() {
-    this._balls.forEach((ball, i) => {
-      // Record previous pos to update spatial hashing
-      const prevPos = createVector(ball.pos.x, ball.pos.y);
-      ball.update(this);
-      this._updateHash(prevPos, ball);
-    });
+    this._balls.forEach((ball, i) => ball.update(this));
   }
 
   /**
@@ -142,119 +137,25 @@ class Tank {
    */
   addBall(ball) {
     this._balls.push(ball);
-    this._placeInHash(this._getSpatialHashPos(ball.pos), ball);
   }
 
   /**
-   * Updates the spatial hashing position of a ball.
-   * @param {p5.Vector} prevPos
-   * @param {Ball} ball
-   * @private
-   */
-  _updateHash(prevPos, ball) {
-    const prevHashPos = this._getSpatialHashPos(prevPos);
-    const currentHashPos = this._getSpatialHashPos(ball.pos);
-    if (!prevHashPos.equals(currentHashPos)) {
-      if (!this._removeFromHash(prevHashPos, ball)) {
-        throw "Invalid previous ball position";
-      }
-      this._placeInHash(currentHashPos, ball);
-    }
-  }
-
-  /**
-   * Places a ball in spatial hash.
-   * @param {p5.Vector} hashPos
-   * @param {Ball} ball
-   * @private
-   */
-  _placeInHash(hashPos, ball) {
-    const hashKey = hashPos.x + "-" + hashPos.y;
-
-    if (!this._spatialHash[hashKey]) {
-      this._spatialHash[hashKey] = [];
-    }
-    this._spatialHash[hashKey].push(ball);
-  }
-
-  /**
-   * Removes a ball from the spatial hash.
-   * @param {p5.Vector} hashPos
-   * @param {Ball} ball
-   * @return {boolean} Whether the removal was successful or not.
-   * @private
-   */
-  _removeFromHash(hashPos, ball) {
-    const hashKey = hashPos.x + "-" + hashPos.y;
-
-    if (this._spatialHash[hashKey]) {
-      // Find ball in hashed array and remove it.
-      const ballIndex = this._spatialHash[hashKey].indexOf(ball);
-      if (ballIndex !== -1) {
-        this._spatialHash[hashKey].splice(ballIndex, 1);
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * Gets the bin where the position should be spatially hashed.
-   * @param {p5.Vector} pos
-   * @return {p5.Vector}
-   * @private
-   */
-  _getSpatialHashPos(pos) {
-    return createVector(Math.floor(pos.x / this.staticDiameter),
-      Math.floor(pos.y / this.staticDiameter));
-  }
-
-  /**
-   * Get balls that could be affected by static effect. This is where spatial
-   * hashing is used to optimize.
+   * Gets the nearby balls that fall within the ball's effect radius.
    * @param {Ball} ball
    * @return {Array<Ball>}
    */
   getNearby(ball) {
-    // Approximates circular viewing limits to a square.
-    // This approximation holds because the spacial hash is divided into
-    // the diameter of the effect circle, such that the circle can only occupy
-    // a maximum of four squares at once.
-
-    // Minimum x value is found at the leftmost point of the circle.
-    // Minimum y value is found at the topmost point of the circle.
-    const xMin =
-      p5.Vector.sub(ball.pos, createVector(this.staticRadius, 0));
-    const yMin =
-      p5.Vector.sub(ball.pos, createVector(0, this.staticRadius));
-
-    const xMinHash = this._getSpatialHashPos(xMin).x;
-    const yMinHash = this._getSpatialHashPos(yMin).y;
-
-    // Can only ever occupy four squares, so iterates over
-    // two to the right and down from the top left.
-    let nearbyBalls = [];
-    for (let i = xMinHash; i < xMinHash + 2; i++) {
-      for (let j = yMinHash; j < yMinHash + 2; j++) {
-        const hashCollection = this._spatialHash[i + '-' + j];
-        if (hashCollection) {
-          nearbyBalls = nearbyBalls.concat(hashCollection);
+    const nearbyBalls = [];
+    this._balls.forEach((otherBall, i) => {
+      // Adds balls that are within the effect radius and not equal to the
+      // caller.
+      if (ball !== otherBall &&
+        p5.Vector.dist(otherBall.pos, ball.pos) <= this.staticRadius) {
+          nearbyBalls.push(otherBall);
         }
-      }
-    }
-
-    // Removes the calling ball from the nearby balls.
-    const selfIndex = nearbyBalls.indexOf(ball);
-    if (selfIndex !== -1) {
-      nearbyBalls.splice(selfIndex, 1);
-    }
-    else throw "Self not present in spatial hashing. Error in spatial hashing.";
-
-    // Only includes balls that are actually within the effect's radius.
-    return nearbyBalls.filter((nearbyBall) => {
-      return p5.Vector.dist(ball.pos, nearbyBall.pos) <= this.staticRadius;
     });
+
+    return nearbyBalls;
   }
 }
 
