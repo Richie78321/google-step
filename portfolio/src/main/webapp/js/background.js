@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Creates a live visualization of balls that repel each other
+ * and bounce off of the walls.
+ */
 const HEIGHT_TO_WIDTH = 0.3;
 const EFFECT_RADIUS_TO_WIDTH = 0.1;
 const BALL_SIZE_TO_WIDTH = 0.01;
@@ -57,22 +61,23 @@ function windowResized() {
  * and drawing to the screen.
  */
 function draw() {
-  background(255);
+  const grayScaleColor = 255; // white
+  background(grayScaleColor);
   ballTank.update();
   ballTank.draw();
 }
 
 /**
- * Tank that holds, updates, and draws statically-charged balls.
+ * Tank that holds, updates, and draws balls that repel each other.
  */
 class Tank {
   /**
    * @param {number} width
    * @param {number} height
-   * @param {number} staticRadius
+   * @param {number} effectRadius
    * @param {number} ballSize
    */
-  constructor(width, height, staticRadius, ballSize) {
+  constructor(width, height, effectRadius, ballSize) {
     /**
      * Height of the tank.
      * @type {number} @const
@@ -86,19 +91,19 @@ class Tank {
     this.width = width;
 
     /**
-     * Effective radius of static effect.
+     * Effective radius of the repulsion effect.
      * @type {number} @const
      */
-    this.staticRadius = staticRadius;
+    this.effectRadius = effectRadius;
 
     /**
-     * Effective diameter of static effect.
+     * Effective diameter of the repulsion effect.
      * @type {number} @const
      */
-    this.staticDiameter = staticRadius * 2;
+    this.effectDiameter = effectRadius * 2;
 
     /**
-     * The size of the static balls.
+     * The size of the repelling balls.
      * @type {number} @const
      */
     this.ballSize = ballSize;
@@ -144,13 +149,13 @@ class Tank {
    * @param {Ball} ball
    * @return {Array<Ball>}
    */
-  getNearby(ball) {
+  getNearbyBalls(ball) {
     const nearbyBalls = [];
     this._balls.forEach((otherBall, i) => {
       // Adds balls that are within the effect radius and not equal to the
       // caller.
       if (ball !== otherBall &&
-        p5.Vector.dist(otherBall.pos, ball.pos) <= this.staticRadius) {
+        p5.Vector.dist(otherBall.pos, ball.pos) <= this.effectRadius) {
           nearbyBalls.push(otherBall);
         }
     });
@@ -160,7 +165,7 @@ class Tank {
 }
 
 /**
- * A statically-charged ball that applies forces to other balls and bounces.
+ * A ball that repels other balls and bounces off of walls.
  */
 class Ball {
   /**
@@ -192,7 +197,7 @@ class Ball {
    * @param {Tank} tank
    */
   update(tank) {
-    const nearbyBalls = tank.getNearby(this);
+    const nearbyBalls = tank.getNearbyBalls(this);
 
     this.vel.add(this._getRepellingForce(nearbyBalls));
     this._bounceBounds(tank);
@@ -242,7 +247,7 @@ class Ball {
     const repellingForce = createVector(0, 0);
 
     // For each ball, creates a vector pointing from the nearby ball to this
-    // ball with a magnitude equal to the magnitude of the static force.
+    // ball with a magnitude equal to the magnitude of the repulsive force.
     // Sums all force vectors to the single repellingForce vector.
     nearbyBalls.forEach((ball, i) => {
       const separationNormal = p5.Vector.sub(this.pos, ball.pos);
@@ -258,18 +263,18 @@ class Ball {
 
       repellingForce.add(separationNormal);
 
-      this._drawStaticLine(forceMagnitude, ball);
+      this._drawForceLine(forceMagnitude, ball);
     });
 
     return repellingForce;
   }
 
   /**
-   * Draws a line to represent static force effect.
+   * Draws a line to represent repulsion force effect.
    * @param {number} forceMagnitude
    * @param {Ball} otherBall
    */
-  _drawStaticLine(forceMagnitude, otherBall) {
+  _drawForceLine(forceMagnitude, otherBall) {
     const STROKE_MAG_MULT = 20;
     const MAX_STROKE_WEIGHT = 4;
 
