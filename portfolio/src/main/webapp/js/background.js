@@ -1,9 +1,12 @@
 const HEIGHT_TO_WIDTH = 0.3;
+const EFFECT_RADIUS_TO_WIDTH = 0.1;
+const BALL_SIZE_TO_WIDTH = 0.01;
+const NUM_BALLS = 25;
+const INITIAL_BALL_VELOCITY_MAGNITUDE = 1;
 /**
  * Runs initial set up of the background and background canvas.
  */
 function setup() {
-  const FRAMERATE = 60;
   const backgroundContainer = document.getElementById("background-container");
 
   const backgroundCanvas =
@@ -11,7 +14,7 @@ function setup() {
       backgroundContainer.clientWidth * HEIGHT_TO_WIDTH);
   backgroundCanvas.parent("background-container");
 
-  frameRate(FRAMERATE);
+  frameRate(60);
 
   initTank();
 }
@@ -21,13 +24,8 @@ let ballTank;
  * Initializes a tank for the background.
  */
 function initTank() {
-  const EFFECT_RAD_TO_WIDTH = 0.1;
-  const BALL_SIZE_TO_WIDTH = 0.01;
-  const NUM_BALLS = 25;
-  const INIT_BALL_VEL = 1;
-
   const ballSize = BALL_SIZE_TO_WIDTH * width;
-  ballTank = new Tank(width, height, EFFECT_RAD_TO_WIDTH * width, ballSize);
+  ballTank = new Tank(width, height, EFFECT_RADIUS_TO_WIDTH * width, ballSize);
 
   // Create balls and add them to the tank.
   // Each start with random positions and velocities.
@@ -35,10 +33,12 @@ function initTank() {
     const randomPos = createVector(Math.random() * ballTank.width,
       Math.random() * ballTank.height);
 
-    const randomVel = p5.Vector.random2D();
-    randomVel.mult(INIT_BALL_VEL);
+    // Gets a random vector on the unit circle as to randomize 
+    // the initial velocity direction.
+    const randomVelocity = p5.Vector.random2D();
+    randomVelocity.mult(INITIAL_BALL_VELOCITY_MAGNITUDE);
 
-    const newBall = new Ball(randomPos, randomVel);
+    const newBall = new Ball(randomPos, randomVelocity);
     ballTank.addBall(newBall);
   }
 }
