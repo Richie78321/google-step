@@ -29,6 +29,8 @@ function initTank() {
   const ballSize = BALL_SIZE_TO_WIDTH * width;
   ballTank = new Tank(width, height, EFFECT_RAD_TO_WIDTH * width, ballSize);
 
+  // Create balls and add them to the tank.
+  // Each start with random positions and velocities.
   for (let i = 0; i < NUM_BALLS; i++) {
     const randomPos = createVector(Math.random() * ballTank.width,
       Math.random() * ballTank.height);
@@ -169,7 +171,9 @@ class Tank {
   _placeInHash(hashPos, ball) {
     const hashKey = hashPos.x + "-" + hashPos.y;
 
-    if (!this._spatialHash[hashKey]) this._spatialHash[hashKey] = [];
+    if (!this._spatialHash[hashKey]) {
+      this._spatialHash[hashKey] = [];
+    }
     this._spatialHash[hashKey].push(ball);
   }
 
@@ -177,13 +181,14 @@ class Tank {
    * Removes a ball from the spatial hash.
    * @param {p5.Vector} hashPos
    * @param {Ball} ball
-   * @return {boolean}
+   * @return {boolean} Whether the removal was successful or not.
    * @private
    */
   _removeFromHash(hashPos, ball) {
     const hashKey = hashPos.x + "-" + hashPos.y;
 
     if (this._spatialHash[hashKey]) {
+      // Find ball in hashed array and remove it.
       const ballIndex = this._spatialHash[hashKey].indexOf(ball);
       if (ballIndex !== -1) {
         this._spatialHash[hashKey].splice(ballIndex, 1);
@@ -195,7 +200,7 @@ class Tank {
   }
 
   /**
-   * Gets the spatial hashing position of a ball
+   * Gets the bin where the position should be spatially hashed.
    * @param {p5.Vector} pos
    * @return {p5.Vector}
    * @private
@@ -212,12 +217,13 @@ class Tank {
    * @return {Array<Ball>}
    */
   getNearby(ball) {
-    // Approximate circular viewing limits to a square.
+    // Approximates circular viewing limits to a square.
     // This approximation holds because the spacial hash is divided into
-    // the diameter of the viewing circle, such that the circle can only
-    // ever be in four squares at once.
+    // the diameter of the effect circle, such that the circle can only occupy
+    // a maximum of four squares at once.
 
-    // Minimum x and y values are found at the left and top edges of the circle.
+    // Minimum x value is found at the leftmost point of the circle.
+    // Minimum y value is found at the topmost point of the circle.
     const xMin =
       p5.Vector.sub(ball.pos, createVector(this.staticRadius, 0));
     const yMin =
@@ -226,8 +232,8 @@ class Tank {
     const xMinHash = this._getSpatialHashPos(xMin).x;
     const yMinHash = this._getSpatialHashPos(yMin).y;
 
-    // Can only ever occupy four squares, so iterate over
-    // two in either direction.
+    // Can only ever occupy four squares, so iterates over
+    // two to the right and down from the top left.
     let nearbyBalls = [];
     for (let i = xMinHash; i < xMinHash + 2; i++) {
       for (let j = yMinHash; j < yMinHash + 2; j++) {
@@ -238,14 +244,14 @@ class Tank {
       }
     }
 
-    // Do not count self in nearby
+    // Removes the calling ball from the nearby balls.
     const selfIndex = nearbyBalls.indexOf(ball);
     if (selfIndex !== -1) {
       nearbyBalls.splice(selfIndex, 1);
     }
     else throw "Self not present in spatial hashing. Error in spatial hashing.";
 
-    // Only include balls that are actually within the effective radius
+    // Only includes balls that are actually within the effect's radius.
     return nearbyBalls.filter((nearbyBall) => {
       return p5.Vector.dist(ball.pos, nearbyBall.pos) <= this.staticRadius;
     });
@@ -303,7 +309,7 @@ class Ball {
   }
 
   /**
-   * Check if ball is out of bounds and invert the velocity to bounce it back.
+   * Checks if ball is out of bounds and invert the velocity to bounce it back.
    * @param {Tank} tank
    * @private
    */
@@ -323,7 +329,7 @@ class Ball {
   }
 
   /**
-   * Get repelling force from nearby balls
+   * Gets repelling force from nearby balls.
    * @param {Array<Ball>} nearbyBalls
    * @return {p5.Vector}
    * @private
@@ -334,11 +340,15 @@ class Ball {
 
     const repellingForce = createVector(0, 0);
 
+    // For each ball, creates a vector pointing from the nearby ball to this
+    // ball with a magnitude equal to the magnitude of the static force.
+    // Sums all force vectors to the single repellingForce vector.
     nearbyBalls.forEach((ball, i) => {
       const separationNormal = p5.Vector.sub(this.pos, ball.pos);
       const distance = separationNormal.mag();
 
-      // Inverse-square law for force
+      // Force is related to inverse square of distance, like the
+      // electrostatic force.
       let forceMagnitude = FORCE_BASE_MAGNITUDE / Math.pow(distance, 2)
       forceMagnitude = Math.min(forceMagnitude, MAX_FORCE);
 
@@ -354,7 +364,7 @@ class Ball {
   }
 
   /**
-   * Draw a line to represent static force effect
+   * Draws a line to represent static force effect.
    * @param {number} forceMagnitude
    * @param {Ball} otherBall
    */
@@ -365,7 +375,7 @@ class Ball {
     let effectWeight = forceMagnitude * STROKE_MAG_MULT;
     effectWeight = Math.min(effectWeight, MAX_STROKE_WEIGHT);
 
-    // Draw visual connector depending on force magnitude
+    // Draws visual connector depending on force magnitude
     stroke(0);
     fill(0);
     strokeWeight(effectWeight);
