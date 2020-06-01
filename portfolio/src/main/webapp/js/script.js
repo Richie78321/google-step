@@ -35,15 +35,15 @@ function addRandomFact() {
  * Requests the data from the '/data' endpoint
  * and adds it to the data container.
  */
-async function getData() {
-    const dataContainer = document.getElementById("data-container");
-    fetch('/data')
-        .then(resp => resp.text())
-        .then(text => {
-            dataContainer.innerText = text;
-        })
-        .catch(err => {
-            console.error(err);
-            dataContainer.innerText = "Error fetching data.";
-        });
+function getData() {
+  const dataContainer = document.getElementById("data-container");
+  fetch('/data')
+    .then(resp => resp.text())
+    .then(text => {
+      dataContainer.innerText = text;
+    })
+    .catch(err => {
+      console.error(err);
+      dataContainer.innerText = "Error fetching data.";
+    });
 }
