@@ -118,13 +118,6 @@ class Tank {
     this.ballSize = ballSize;
 
     /**
-     * Spatial hashing grid used to reduce calls to balls
-     * beyond effective radius.
-     * @type {Object.<string, Array<Ball>>} @private
-     */
-    this._spatialHash = {};
-
-    /**
      * Array of statically-charged balls.
      * @type {Array<Ball>} @private
      */
