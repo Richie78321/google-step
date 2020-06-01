@@ -38,10 +38,22 @@
       </div>
       <hr class="mb-4" />
 
-      <h3>About me</h3>
-      <p><i>tldr;</i> I am a computer science student currently studying at the University of Pittsburgh.</p>
-      <p>I think my most defining characteristic is that I am a big fan of learning by doing. Over the past four years, I have been
-      learning computer science through personal projects that span a lot of different disciplines.</p>
+      <div class="row">
+        <div class="col-md-9">
+          <h3>About me</h3>
+          <p><i>tldr;</i> I am a computer science student currently studying at the University of Pittsburgh.</p>
+          <p>I think my most defining characteristic is that I am a big fan of learning by doing. Over the past four years, I have been
+          learning computer science through personal projects that span a lot of different disciplines.</p>
+        </div>
+        <div class="col-md-3">
+          <div class="card">
+            <button class="btn btn-primary" onclick="addRandomFact()">Get a Random Fact!</button>
+            <div class="card-body">
+              <h5 id="fact-container"></h5>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div class="mx-4">
         <hr />
@@ -138,19 +150,10 @@
         </a>
       </div>
 
-      <h3>Thanks for visiting</h3>
-      <div id="background-container" class="w-100"></div>
-
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <div class="my-4 card w-50 mx-auto">
-        <button class="btn btn-primary" onclick="addRandomFact()">Get a Random Fact!</button>
-        <div class="card-body">
-          <h4 id="fact-container"></h4>
-        </div>
+      <hr />
+      <div id="comment-section" class="mt-2 mb-5">
+        <button class="btn btn-primary">Get Data</button>
+        <h1 id="data-container"></h1>
       </div>
 
     </div>
