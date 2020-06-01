@@ -34,7 +34,7 @@ function initTank() {
   // Create balls and add them to the tank.
   // Each start with random positions and velocities.
   for (let i = 0; i < NUM_BALLS; i++) {
-    const randomPos = createVector(Math.random() * ballTank.width,
+    const randomPosition = createVector(Math.random() * ballTank.width,
       Math.random() * ballTank.height);
 
     // Gets a random vector on the unit circle as to randomize 
@@ -42,7 +42,7 @@ function initTank() {
     const randomVelocity = p5.Vector.random2D();
     randomVelocity.mult(INITIAL_BALL_VELOCITY_MAGNITUDE);
 
-    const newBall = new Ball(randomPos, randomVelocity);
+    const newBall = new Ball(randomPosition, randomVelocity);
     ballTank.addBall(newBall);
   }
 }
@@ -64,7 +64,7 @@ function draw() {
   const grayScaleColor = 255; // white
   background(grayScaleColor);
   ballTank.update();
-  ballTank.draw();
+  ballTank.drawBalls();
 }
 
 /**
@@ -132,7 +132,7 @@ class Tank {
   /**
    * Draws the balls in the tank.
    */
-  draw() {
+  drawBalls() {
     this._balls.forEach((ball, i) => ball.draw(this));
   }
 
@@ -155,7 +155,7 @@ class Tank {
       // Adds balls that are within the effect radius and not equal to the
       // caller.
       if (ball !== otherBall &&
-        p5.Vector.dist(otherBall.pos, ball.pos) <= this.effectRadius) {
+        p5.Vector.dist(otherBall.position, ball.position) <= this.effectRadius) {
           nearbyBalls.push(otherBall);
         }
     });
@@ -169,20 +169,20 @@ class Tank {
  */
 class Ball {
   /**
-   * @param {p5.Vector} initialPos
-   * @param {p5.Vector} initialVel
+   * @param {p5.Vector} initialPosition
+   * @param {p5.Vector} initialVelocity
    */
-  constructor(initialPos, initialVel) {
+  constructor(initialPosition, initialVelocity) {
     /**
      * The position of the ball.
      * @type {p5.Vector}
      */
-    this.pos = initialPos;
+    this.position = initialPosition;
     /**
      * The velocity of the ball.
      * @type {p5.Vector}
      */
-    this.vel = initialVel;
+    this.velocity = initialVelocity;
     /**
      * The color of the ball.
      * @type {p5.Color} @const
@@ -199,10 +199,10 @@ class Ball {
   update(tank) {
     const nearbyBalls = tank.getNearbyBalls(this);
 
-    this.vel.add(this._getRepellingForce(nearbyBalls));
+    this.velocity.add(this._getRepellingForce(nearbyBalls));
     this._bounceBounds(tank);
 
-    this.pos.add(this.vel);
+    this.position.add(this.velocity);
   }
 
   /**
@@ -211,7 +211,7 @@ class Ball {
    */
   draw(tank) {
     fill(this.color);
-    ellipse(this.pos.x, this.pos.y, tank.ballSize, tank.ballSize);
+    ellipse(this.position.x, this.position.y, tank.ballSize, tank.ballSize);
   }
 
   /**
@@ -220,17 +220,17 @@ class Ball {
    * @private
    */
   _bounceBounds (tank) {
-    if (this.pos.x - tank.ballSize / 2 < 0) {
-      this.vel.x = -this.vel.x;
+    if (this.position.x - tank.ballSize / 2 < 0) {
+      this.velocity.x = -this.velocity.x;
     }
-    else if (this.pos.x + tank.ballSize / 2 > tank.width) {
-      this.vel.x = -this.vel.x;
+    else if (this.position.x + tank.ballSize / 2 > tank.width) {
+      this.velocity.x = -this.velocity.x;
     }
-    if (this.pos.y - tank.ballSize / 2 < 0) {
-      this.vel.y = -this.vel.y;
+    if (this.position.y - tank.ballSize / 2 < 0) {
+      this.velocity.y = -this.velocity.y;
     }
-    else if (this.pos.y + tank.ballSize / 2 > tank.height) {
-      this.vel.y = -this.vel.y;
+    else if (this.position.y + tank.ballSize / 2 > tank.height) {
+      this.velocity.y = -this.velocity.y;
     }
   }
 
@@ -250,7 +250,7 @@ class Ball {
     // ball with a magnitude equal to the magnitude of the repulsive force.
     // Sums all force vectors to the single repellingForce vector.
     nearbyBalls.forEach((ball, i) => {
-      const separationNormal = p5.Vector.sub(this.pos, ball.pos);
+      const separationNormal = p5.Vector.sub(this.position, ball.position);
       const distance = separationNormal.mag();
 
       // Force is related to inverse square of distance, like the
@@ -285,7 +285,7 @@ class Ball {
     stroke(0);
     fill(0);
     strokeWeight(effectWeight);
-    line(this.pos.x, this.pos.y, otherBall.pos.x, otherBall.pos.y);
+    line(this.position.x, this.position.y, otherBall.position.x, otherBall.position.y);
     strokeWeight(1);
   }
 }
