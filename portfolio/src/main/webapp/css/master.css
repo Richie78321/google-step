@@ -1,3 +1,8 @@
+#fact-container {
+  height: 75px;
+  overflow-y: auto;
+}
+
 .project-card {
   transition: 0.1s;
 }
