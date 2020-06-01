@@ -1,6 +1,6 @@
 #fact-container {
   height: 75px;
-  overflow-y: auto !important;
+  overflow-y: auto;
 }
 
 .project-card {
