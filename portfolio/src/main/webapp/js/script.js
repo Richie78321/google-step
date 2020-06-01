@@ -44,6 +44,6 @@ async function getData() {
         })
         .catch(err => {
             console.error(err);
-            dataContainer.innerText = "Error getting data.";
+            dataContainer.innerText = "Error fetching data.";
         });
 }
