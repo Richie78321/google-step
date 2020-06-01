@@ -9,6 +9,9 @@ const NUM_BALLS = 25;
 const INITIAL_BALL_VELOCITY_MAGNITUDE = 1;
 /**
  * Runs initial set up of the background and background canvas.
+ * 
+ * Called by the p5.js framework:
+ * https://p5js.org/reference/#/p5/setup
  */
 function setup() {
   const backgroundContainer = document.getElementById("background-container");
@@ -49,6 +52,9 @@ function initTank() {
 
 /**
  * Resizes the canvas when the window is resized.
+ * 
+ * Called by the p5.js framework:
+ * https://p5js.org/reference/#/p5/windowResized
  */
 function windowResized() {
   const canvasContainer = document.getElementById("background-container");
@@ -59,6 +65,9 @@ function windowResized() {
 /**
  * Called every draw loop; used for updating game logic
  * and drawing to the screen.
+ * 
+ * Called by the p5.js framework:
+ * https://p5js.org/reference/#/p5/draw
  */
 function draw() {
   const grayScaleColor = 255; // white
