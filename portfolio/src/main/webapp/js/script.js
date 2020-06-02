@@ -30,3 +30,20 @@ function addRandomFact() {
   const factContainer = document.getElementById('fact-container');
   factContainer.innerText = fact;
 }
+
+/**
+ * Requests the data from the '/data' endpoint
+ * and adds it to the data container.
+ */
+function getData() {
+  const dataContainer = document.getElementById("data-container");
+  fetch('/data')
+    .then(resp => resp.text())
+    .then(text => {
+      dataContainer.innerText = text;
+    })
+    .catch(err => {
+      console.error(err);
+      dataContainer.innerText = "Error fetching data.";
+    });
+}
