@@ -2,7 +2,7 @@
  * Starts necessary JS after DOM has loaded
  */
 function onLoad() {
-  getComments();
+  loadComments();
   startActivitiesScroll()
   loadFreeze();
 }
