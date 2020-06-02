@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/comments")
 public class DataServlet extends HttpServlet {
 
-  private final String UNSAFE_CHARACTERS_REGEX = "[^A-Za-z0-9._~()'!*:@,;+?\\s-]"; 
+  private final String UNSAFE_CHARACTERS_REGEX = "[^A-Za-z0-9._~()'!*:@,;+?\\s-]";
 
   private final List<Comment> sessionComments = new ArrayList<Comment>();
   private final Gson gson = new Gson();
@@ -75,11 +75,12 @@ public class DataServlet extends HttpServlet {
     response.setStatus(HttpServletResponse.SC_CREATED);
     response.setContentType("application/json;");
     response.getWriter().println(commentJson);
+    response.sendRedirect("/index.html");
   }
 
   /**
    * Validates the comment parameters of a new comment.
-   * @return Return the error string or null if there is no error.
+   * @return Return the error string or null if there are no errors.
    */
   private String validateIncomingComment(String commentAuthor, String commentBody) {
     String validationErrors = "";
