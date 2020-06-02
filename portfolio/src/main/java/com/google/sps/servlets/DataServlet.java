@@ -31,23 +31,6 @@ public class DataServlet extends HttpServlet {
   private final List<Comment> sampleComments = new ArrayList<Comment>();
 
   @Override
-  public void init() {
-    // Add sample data
-    sampleComments.add(new Comment(
-      "Richie Goulazian",
-      "This is an example of a comment. This is one of multiple comments that I need to write"
-    ));
-    sampleComments.add(new Comment(
-      "Rich Goulaz",
-      "This is not an example of a comment... or maybe it is? How to tell..."
-    ));
-    sampleComments.add(new Comment(
-      "Bob Guy",
-      "My name is Bob. I like this page."
-    ));
-  }
-
-  @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // Convert comments to JSON
     Gson gson = new Gson();
