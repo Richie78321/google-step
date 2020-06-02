@@ -146,9 +146,23 @@
         </a>
       </div>
 
-      <hr />
-      <div id="comment-section" class="mt-2 mb-5">
-        <button class="btn btn-primary" onclick="getComments()">Get Comments</button>
+      <h3>Comments</h3>
+      <div id="comment-section" class="mt-4 mb-5">
+        <div class="card p-4 mb-4">
+          <h4 class="text-center">Post your thoughts!</h4>
+          <form id="comment-form" action="/comments" method="POST">
+            <div class="form-group">
+              <label for="author">Name <small class="text-muted"></small></label>
+              <input type="text" class="form-control" name="author" placeholder="Anonymous"></input>
+            </div>
+            <div class="form-group">
+              <label for="comment-body">Comment</label>
+              <textarea class="form-control comment-input" name="comment-body"></textarea>
+            </div>
+            <button class="btn btn-primary" type="submit">Post</button>
+          </form>
+        </div>
+        <div id="comment-status"></div>
         <div id="comment-container" class="d-flex flex-column"></div>
       </div>
 
