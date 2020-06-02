@@ -18,6 +18,7 @@
     <script src="https://unpkg.com/freezeframe/dist/freezeframe.min.js"></script>
 
     <script src="./js/load.js"></script>
+    <script src="./js/comments.js"></script>
     <script src="./js/script.js"></script>
     <script src="./js/activities.js"></script>
   </head>
@@ -148,21 +149,21 @@
 
       <h3>Comments</h3>
       <div id="comment-section" class="mt-4 mb-5">
+        <div id="comment-status"></div>
         <div class="card p-4 mb-4">
           <h4 class="text-center">Post your thoughts!</h4>
           <form id="comment-form" action="/comments" method="POST">
             <div class="form-group">
               <label for="author">Name <small class="text-muted"></small></label>
-              <input type="text" class="form-control" name="author" placeholder="Anonymous"></input>
+              <input type="text" class="form-control" name="author" value="Anonymous" maxlength="20" required></input>
             </div>
             <div class="form-group">
               <label for="comment-body">Comment</label>
-              <textarea class="form-control comment-input" name="comment-body"></textarea>
+              <textarea class="form-control comment-input" name="comment-body" maxlength="120" required></textarea>
             </div>
             <button class="btn btn-primary" type="submit">Post</button>
           </form>
         </div>
-        <div id="comment-status"></div>
         <div id="comment-container" class="d-flex flex-column"></div>
       </div>
 
