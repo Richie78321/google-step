@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/comments")
 public class DataServlet extends HttpServlet {
 
+  // Whitelist to avoid the possibility of XSS
   private final String UNSAFE_CHARACTERS_REGEX = "[^A-Za-z0-9._~()'!*:@,;+?\\s-]";
 
   private final List<Comment> sessionComments = new ArrayList<Comment>();
