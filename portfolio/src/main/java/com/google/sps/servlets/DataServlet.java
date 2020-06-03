@@ -47,10 +47,8 @@ public class DataServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // Get new comment parameters
-    final String COMMENT_AUTHOR_PARAM = "author";
-    final String COMMENT_BODY_PARAM = "comment-body";
-    String commentAuthor = getParameter(request, COMMENT_AUTHOR_PARAM, "");
-    String commentBody = getParameter(request, COMMENT_BODY_PARAM, "");
+    String commentAuthor = getParameter(request, "author", "");
+    String commentBody = getParameter(request, "comment-body", "");
 
     // Remove unsafe characters
     commentAuthor = commentAuthor.replaceAll(UNSAFE_CHARACTERS_REGEX, "");
