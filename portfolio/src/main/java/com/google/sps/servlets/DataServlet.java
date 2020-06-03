@@ -14,6 +14,12 @@
 
 package com.google.sps.servlets;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
 import com.google.gson.Gson;
 import com.google.sps.data.Comment;
 import java.io.IOException;
@@ -31,13 +37,15 @@ public class DataServlet extends HttpServlet {
   // Whitelist to avoid the possibility of XSS
   private final String UNSAFE_CHARACTERS_REGEX = "[^A-Za-z0-9._~()'!*:@,;+?\\s-]";
 
-  private final List<Comment> sessionComments = new ArrayList<Comment>();
+  DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
   private final Gson gson = new Gson();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    Gson gson = new Gson();
-    String commentJson = gson.toJson(sessionComments);
+    Query allCommentsQuery = new Query("Comment");
+    List<Comment> comments = queryCommentsDatastore(allCommentsQuery);
+
+    String commentJson = gson.toJson(comments);
 
     // Send the comment JSON as the response
     response.setContentType("application/json;");
@@ -61,7 +69,7 @@ public class DataServlet extends HttpServlet {
     }
 
     Comment newComment = new Comment(commentAuthor, commentBody);
-    sessionComments.add(newComment);
+    Key datastoreKey = addCommentToDatastore(newComment);
 
     String commentJson = gson.toJson(newComment);
 
@@ -70,6 +78,42 @@ public class DataServlet extends HttpServlet {
     response.setContentType("application/json;");
     response.getWriter().println(commentJson);
     response.sendRedirect("/index.html");
+  }
+
+  /**
+   * Adds a comment to the datastore.
+   * @return Return the key of the new comment entity in the datastore.
+   */
+  private Key addCommentToDatastore(Comment comment) {
+    Entity commentEntity = new Entity("Comment");
+    commentEntity.setProperty("author", comment.getAuthor());
+    commentEntity.setProperty("comment-body", comment.getCommentBody());
+
+    return datastore.put(commentEntity);
+  }
+
+  /**
+   * Queries comments from the datastore.
+   * @return Return the resulting comments.
+   */
+  private List<Comment> queryCommentsDatastore(Query commentsQuery) {
+    if (!commentsQuery.getKind().equals("Comment")) {
+      throw new IllegalArgumentException("Query must be made to kind 'Comment'.");
+    }
+
+    PreparedQuery queryResults = datastore.prepare(commentsQuery);
+
+    List<Comment> comments = new ArrayList<Comment>();
+    for (Entity commentEntity : queryResults.asIterable()) {
+      long id = commentEntity.getKey().getId();
+      String author = (String) commentEntity.getProperty("author");
+      String commentBody = (String) commentEntity.getProperty("comment-body");
+
+      Comment newComment = new Comment(author, commentBody, id);
+      comments.add(newComment);
+    }
+
+    return comments;
   }
 
   /**

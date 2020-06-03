@@ -20,11 +20,11 @@
     <!-- P5js https://p5js.org/ -->
     <script src="https://cdn.jsdelivr.net/npm/p5@1.0.0/lib/p5.js"></script>
 
-    <script src="./js/load.js"></script>
-    <script src="./js/comments.js"></script>
-    <script src="./js/background.js"></script>
-    <script src="./js/script.js"></script>
     <script src="./js/activities.js"></script>
+    <script src="./js/background.js"></script>
+    <script src="./js/comments.js"></script>
+    <script src="./js/load.js"></script>
+    <script src="./js/script.js"></script>
   </head>
   <body onload="onLoad()">
     <div class="container">
@@ -167,10 +167,12 @@
             <button class="btn btn-primary" type="submit">Post</button>
           </form>
         </div>
-    
+        <div id="comment-container" class="d-flex flex-column"></div>
+      </div>
+
       <h3>Thanks for visiting</h3>
       <div id="background-container" class="w-100"></div>
-    
+
     </div>
   </body>
 </html>
