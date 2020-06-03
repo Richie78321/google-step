@@ -38,7 +38,6 @@ function removeCommentsOnPage() {
 function addCommentToPage(comment) {
   const commentContainer = document.getElementById("comment-container");
   
-  // Create a new comment element
   const newComment = document.createElement("div");
   newComment.classList.add("p-4");
   newComment.classList.add("border-bottom");
@@ -49,7 +48,5 @@ function addCommentToPage(comment) {
   authorFooter.innerText = comment.author;
 
   newComment.appendChild(authorFooter);
-
-  // Add it to the page
   commentContainer.appendChild(newComment);
 }
