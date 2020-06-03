@@ -35,26 +35,22 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    // Convert comments to JSON
     Gson gson = new Gson();
     String commentJson = gson.toJson(sessionComments);
 
-    // Send the JSON as the response
+    // Send the comment JSON as the response
     response.setContentType("application/json;");
     response.getWriter().println(commentJson);
   }
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    // Get new comment parameters
     String commentAuthor = getParameter(request, "author", "");
     String commentBody = getParameter(request, "comment-body", "");
 
-    // Remove unsafe characters
     commentAuthor = commentAuthor.replaceAll(UNSAFE_CHARACTERS_REGEX, "");
     commentBody = commentBody.replaceAll(UNSAFE_CHARACTERS_REGEX, "");
 
-    // Validate the comment parameters
     String validationError = validateIncomingComment(commentAuthor, commentBody);
     if (validationError != null) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -63,13 +59,12 @@ public class DataServlet extends HttpServlet {
       return;
     }
 
-    // Add the comment to the session comments
     Comment newComment = new Comment(commentAuthor, commentBody);
     sessionComments.add(newComment);
 
     String commentJson = gson.toJson(newComment);
 
-    // Return the new comment
+    // Return the new comment JSON as confirmation
     response.setStatus(HttpServletResponse.SC_CREATED);
     response.setContentType("application/json;");
     response.getWriter().println(commentJson);
@@ -83,7 +78,6 @@ public class DataServlet extends HttpServlet {
   private String validateIncomingComment(String commentAuthor, String commentBody) {
     String validationErrors = "";
 
-    // Check if author or body fields are blank
     if (commentAuthor.isBlank()) {
       validationErrors += "Please include a comment author (cannot be whitespace).";
     }
