@@ -21,6 +21,7 @@
     <script src="https://cdn.jsdelivr.net/npm/p5@1.0.0/lib/p5.js"></script>
 
     <script src="./js/load.js"></script>
+    <script src="./js/comments.js"></script>
     <script src="./js/background.js"></script>
     <script src="./js/script.js"></script>
     <script src="./js/activities.js"></script>
@@ -150,15 +151,26 @@
         </a>
       </div>
 
+      <h3>Comments</h3>
+      <div id="comment-section" class="mt-4 mb-5">
+        <div class="card p-4 mb-4">
+          <h4 class="text-center">Post your thoughts!</h4>
+          <form id="comment-form" action="/comments" method="POST">
+            <div class="form-group">
+              <label for="author">Name <small class="text-muted"></small></label>
+              <input type="text" class="form-control" name="author" value="Anonymous" maxlength="20" required></input>
+            </div>
+            <div class="form-group">
+              <label for="comment-body">Comment</label>
+              <textarea class="form-control comment-input" name="comment-body" maxlength="120" required></textarea>
+            </div>
+            <button class="btn btn-primary" type="submit">Post</button>
+          </form>
+        </div>
+    
       <h3>Thanks for visiting</h3>
       <div id="background-container" class="w-100"></div>
-
-      <hr />
-      <div id="comment-section" class="mt-2 mb-5">
-        <button class="btn btn-primary" onclick="getComments()">Get Comments</button>
-        <div id="comment-container" class="d-flex flex-column"></div>
-      </div>
-
+    
     </div>
   </body>
 </html>

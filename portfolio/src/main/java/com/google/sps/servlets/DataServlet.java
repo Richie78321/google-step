@@ -28,33 +28,81 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/comments")
 public class DataServlet extends HttpServlet {
 
-  private final List<Comment> sampleComments = new ArrayList<Comment>();
+  // Whitelist to avoid the possibility of XSS
+  private final String UNSAFE_CHARACTERS_REGEX = "[^A-Za-z0-9._~()'!*:@,;+?\\s-]";
 
-  @Override
-  public void init() {
-    // Add sample data
-    sampleComments.add(new Comment(
-      "Richie Goulazian",
-      "This is an example of a comment. This is one of multiple comments that I need to write"
-    ));
-    sampleComments.add(new Comment(
-      "Rich Goulaz",
-      "This is not an example of a comment... or maybe it is? How to tell..."
-    ));
-    sampleComments.add(new Comment(
-      "Bob Guy",
-      "My name is Bob. I like this page."
-    ));
-  }
+  private final List<Comment> sessionComments = new ArrayList<Comment>();
+  private final Gson gson = new Gson();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    // Convert comments to JSON
     Gson gson = new Gson();
-    String commentJson = gson.toJson(sampleComments);
+    String commentJson = gson.toJson(sessionComments);
 
-    // Send the JSON as the response
+    // Send the comment JSON as the response
     response.setContentType("application/json;");
     response.getWriter().println(commentJson);
+  }
+
+  @Override
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    String commentAuthor = getParameter(request, "author", "");
+    String commentBody = getParameter(request, "comment-body", "");
+
+    commentAuthor = commentAuthor.replaceAll(UNSAFE_CHARACTERS_REGEX, "");
+    commentBody = commentBody.replaceAll(UNSAFE_CHARACTERS_REGEX, "");
+
+    String validationError = validateIncomingComment(commentAuthor, commentBody);
+    if (validationError != null) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      response.setContentType("text/html;");
+      response.getWriter().println(validationError);
+      return;
+    }
+
+    Comment newComment = new Comment(commentAuthor, commentBody);
+    sessionComments.add(newComment);
+
+    String commentJson = gson.toJson(newComment);
+
+    // Return the new comment JSON as confirmation
+    response.setStatus(HttpServletResponse.SC_CREATED);
+    response.setContentType("application/json;");
+    response.getWriter().println(commentJson);
+    response.sendRedirect("/index.html");
+  }
+
+  /**
+   * Validates the comment parameters of a new comment.
+   * @return Return the error string or null if there are no errors.
+   */
+  private String validateIncomingComment(String commentAuthor, String commentBody) {
+    String validationErrors = "";
+
+    if (commentAuthor.isBlank()) {
+      validationErrors += "Please include a comment author (cannot be whitespace).";
+    }
+    if (commentBody.isBlank()) {
+      if (validationErrors.length() > 0) validationErrors += " ";
+      validationErrors += "Please include a comment body (cannot be whitespace).";
+    }
+
+    if (validationErrors.isEmpty()) {
+      return null;
+    } else {
+      return validationErrors;
+    }
+  }
+
+  /**
+   * @return Returns the request parameter associated with the inputted name,
+   * or returns the default value if the specified parameter is not defined.
+   */
+  private String getParameter(HttpServletRequest request, String name, String defaultValue) {
+    String value = request.getParameter(name);
+    if (value == null) {
+      return defaultValue;
+    }
+    return value;
   }
 }

@@ -2,7 +2,8 @@
  * Starts necessary JS after DOM has loaded
  */
 function onLoad() {
-  startActivitiesScroll();
+  loadComments();
+  startActivitiesScroll()
   loadFreeze();
 }
 
@@ -11,6 +12,6 @@ function onLoad() {
  */
 function loadFreeze() {
   const freezeframe = new Freezeframe();
-
+  
   freezeframe.stop();
 }
