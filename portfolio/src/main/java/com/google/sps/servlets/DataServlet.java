@@ -88,8 +88,7 @@ public class DataServlet extends HttpServlet {
 
     if (validationErrors.isEmpty()) {
       return null;
-    }
-    else {
+    } else {
       return validationErrors;
     }
   }
