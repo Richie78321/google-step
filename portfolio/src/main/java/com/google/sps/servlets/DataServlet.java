@@ -70,6 +70,7 @@ public class DataServlet extends HttpServlet {
 
     Comment newComment = new Comment(commentAuthor, commentBody);
     Key datastoreKey = addCommentToDatastore(newComment);
+    newComment.setId(datastoreKey.getId());
 
     String commentJson = gson.toJson(newComment);
 

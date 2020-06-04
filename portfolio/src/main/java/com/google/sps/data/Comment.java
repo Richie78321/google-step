@@ -19,7 +19,7 @@ public final class Comment {
 
   private final String author;
   private final String commentBody;
-  private final long id;
+  private long id;
 
   /**
     * Creates a new comment object without an ID.
@@ -54,5 +54,9 @@ public final class Comment {
 
   public long getId() {
     return id;
+  }
+
+  public void setId(long id) {
+    this.id = id;
   }
 }
