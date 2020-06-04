@@ -1,9 +1,9 @@
 /**
- * Loads the comment system.
+ * Initializes the comment system.
  *
  * Adds a submission event listener to the comment form and loads the comments.
  */
-function loadCommentsSystem() {
+function initCommentsSystem() {
   const commentForm = document.getElementById("comment-form");
   commentForm.addEventListener("submit", attemptPostComment);
 
