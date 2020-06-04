@@ -3,6 +3,23 @@
   overflow-y: auto;
 }
 
+.notification {
+  opacity: 80%;
+  transition: opacity 1s linear;
+  -moz-transition: opacity 1s linear;
+  -o-transition: opacity 1s linear;
+  -webkit-transition: opacity 1s linear;
+  word-wrap: break-word;
+}
+
+#notification-container {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 20vw;
+  z-index: 10;
+}
+
 .project-card {
   transition: 0.1s;
 }

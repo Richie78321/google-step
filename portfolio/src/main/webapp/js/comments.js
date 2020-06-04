@@ -1,20 +1,38 @@
 /**
+ * Initializes the comment system.
+ *
+ * Adds a submission event listener to the comment form and loads the comments.
+ */
+function initCommentsSystem() {
+  const commentForm = document.getElementById("comment-form");
+  commentForm.addEventListener("submit", postComment);
+
+  loadComments();
+}
+
+/**
  * Gets comments from the '/comments' endpoint
  * and displays them in the comments section.
  */
 function loadComments() {
-  fetch('/comments')
-    .then(resp => resp.json())
-    .then(comments => {
+  fetch('/comments').then(resp => {
+      if (resp.ok) {
+        return resp.json();
+      } else {
+        return resp.text().then(
+            text => Promise.reject(`Error ${resp.status}: ${text}`));
+      }
+    }).then(comments => {
       console.log("Received comments: ");
       console.log(comments);
 
       removeCommentsOnPage();
       comments.forEach((comment) => addCommentToPage(comment));  
-    })
-    .catch(err => {
+    }).catch(err => {
       console.error(err);
-      alert("Failed to populate comments.");
+
+      addNotification(
+          "Failed to populate the comments section!", "alert-danger");
     });
 }
 
@@ -39,8 +57,7 @@ function addCommentToPage(comment) {
   const commentContainer = document.getElementById("comment-container");
   
   const newComment = document.createElement("div");
-  newComment.classList.add("p-4");
-  newComment.classList.add("border-bottom");
+  newComment.classList.add("p-4", "border-bottom");
   newComment.innerText = comment.commentBody;
 
   const authorFooter = document.createElement("footer");
@@ -49,4 +66,44 @@ function addCommentToPage(comment) {
 
   newComment.appendChild(authorFooter);
   commentContainer.appendChild(newComment);
+}
+
+/**
+ * Attempts to post a comment using the comment form data.
+ * @param {Event} event
+ */
+function postComment(event) {
+  // Prevents the form submission from causing a browser refresh
+  event.preventDefault();
+
+  const commentForm = document.getElementById("comment-form");
+
+  // Form data is encoded strictly in the form multipart/form-data
+  // However, Java servlet only supports application/x-www-form-urlencoded
+  // So use URLSearchParams to convert the data to the supported format
+  const formData = new URLSearchParams(new FormData(commentForm)).toString();
+
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: formData
+  };
+
+  fetch('/comments', requestOptions).then(resp => {
+      if (resp.ok) {
+        addNotification("Comment posted successfully!", "alert-success");
+        loadComments();
+      } else {
+        return resp.text().then(
+            text => Promise.reject(`Error ${resp.status}: ${text}`));
+      }
+    }).catch(err => {
+      console.error(err);
+
+      addNotification(
+          "Failed to post your comment! Please try again later.", 
+          "alert-danger");
+    });
 }
