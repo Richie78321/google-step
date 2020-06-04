@@ -16,8 +16,8 @@
   position: fixed;
   right: 0;
   top: 0;
-  z-index: 10;
   width: 20vw;
+  z-index: 10;
 }
 
 .project-card {
