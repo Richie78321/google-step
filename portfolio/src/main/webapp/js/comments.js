@@ -4,7 +4,14 @@
  */
 function loadComments() {
   fetch('/comments')
-    .then(resp => resp.json())
+    .then(resp => {
+      if (resp.ok) {
+        return resp.json();
+      } else {
+        return resp.text()
+          .then(text => Promise.reject(`Error ${resp.status}: ${text}`));
+      }
+    })
     .then(comments => {
       console.log("Received comments: ");
       console.log(comments);
@@ -14,7 +21,9 @@ function loadComments() {
     })
     .catch(err => {
       console.error(err);
-      alert("Failed to populate comments.");
+
+      addNotification("Failed to populate the comments section!", 
+        "alert-danger");
     });
 }
 

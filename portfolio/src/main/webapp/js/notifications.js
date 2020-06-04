@@ -4,7 +4,7 @@
  * @param {string} alertClass The class of the alert. Useful for applying style.
  * @param {number} displayTime Time to display the alert in milliseconds.
  */
-function addNotification(msg, alertClass, displayTime) {
+function addNotification(msg, alertClass, displayTime = 10000) {
   const NOTIFICATION_FADE_OUT_TIME = 1000; // 1 second
   const notificationContainer = document.getElementById("notification-container");
 
