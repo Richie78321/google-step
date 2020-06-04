@@ -54,8 +54,8 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    String commentAuthor = getParameter(request, "author", "");
-    String commentBody = getParameter(request, "comment-body", "");
+    String commentAuthor = getParameter(request, Comment.AUTHOR_KEY, "");
+    String commentBody = getParameter(request, Comment.BODY_KEY, "");
 
     commentAuthor = commentAuthor.replaceAll(UNSAFE_CHARACTERS_REGEX, "");
     commentBody = commentBody.replaceAll(UNSAFE_CHARACTERS_REGEX, "");
@@ -85,8 +85,8 @@ public class DataServlet extends HttpServlet {
    */
   private Key addCommentToDatastore(Comment comment) {
     Entity commentEntity = new Entity("Comment");
-    commentEntity.setProperty("author", comment.getAuthor());
-    commentEntity.setProperty("comment-body", comment.getCommentBody());
+    commentEntity.setProperty(Comment.AUTHOR_KEY, comment.getAuthor());
+    commentEntity.setProperty(Comment.BODY_KEY, comment.getCommentBody());
 
     return datastore.put(commentEntity);
   }
@@ -105,8 +105,8 @@ public class DataServlet extends HttpServlet {
     List<Comment> comments = new ArrayList<Comment>();
     for (Entity commentEntity : queryResults.asIterable()) {
       long id = commentEntity.getKey().getId();
-      String author = (String) commentEntity.getProperty("author");
-      String commentBody = (String) commentEntity.getProperty("comment-body");
+      String author = (String) commentEntity.getProperty(Comment.AUTHOR_KEY);
+      String commentBody = (String) commentEntity.getProperty(Comment.BODY_KEY);
 
       Comment newComment = new Comment(author, commentBody, id);
       comments.add(newComment);

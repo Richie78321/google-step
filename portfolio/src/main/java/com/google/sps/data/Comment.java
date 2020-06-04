@@ -17,6 +17,9 @@ package com.google.sps.data;
 /** Class containing comment data. */
 public final class Comment {
 
+  public static final String AUTHOR_KEY = "author";
+  public static final String BODY_KEY = "comment-body";
+
   private final String author;
   private final String commentBody;
   private long id = -1;
