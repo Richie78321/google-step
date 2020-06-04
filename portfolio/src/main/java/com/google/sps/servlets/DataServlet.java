@@ -62,9 +62,7 @@ public class DataServlet extends HttpServlet {
 
     String validationError = validateIncomingComment(commentAuthor, commentBody);
     if (validationError != null) {
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      response.setContentType("text/html;");
-      response.getWriter().println(validationError);
+      sendRawTextError(response, HttpServletResponse.SC_BAD_REQUEST, validationError);
       return;
     }
 
@@ -149,5 +147,15 @@ public class DataServlet extends HttpServlet {
       return defaultValue;
     }
     return value;
+  }
+
+  /**
+   * Sends an error to the client as raw text instead of the default HTML page.
+   */
+  private void sendRawTextError(HttpServletResponse response, int errorCode, String errorMsg) 
+    throws IOException {
+    response.setStatus(errorCode);
+    response.setContentType("text/html;");
+    response.getWriter().println(errorMsg);
   }
 }
