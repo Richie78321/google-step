@@ -5,7 +5,7 @@
  */
 function initCommentsSystem() {
   const commentForm = document.getElementById("comment-form");
-  commentForm.addEventListener("submit", attemptPostComment);
+  commentForm.addEventListener("submit", postComment);
 
   loadComments();
 }
@@ -73,7 +73,7 @@ function addCommentToPage(comment) {
  * Attempts to post a comment using the comment form data.
  * @param {Event} event
  */
-function attemptPostComment(event) {
+function postComment(event) {
   // Prevents the form submission from causing a browser refresh
   event.preventDefault();
 
