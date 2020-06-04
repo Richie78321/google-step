@@ -15,28 +15,25 @@ function initCommentsSystem() {
  * and displays them in the comments section.
  */
 function loadComments() {
-  fetch('/comments')
-    .then(resp => {
-      if (resp.ok) {
-        return resp.json();
-      } else {
-        return resp.text()
-          .then(text => Promise.reject(`Error ${resp.status}: ${text}`));
-      }
-    })
-    .then(comments => {
-      console.log("Received comments: ");
-      console.log(comments);
+  fetch('/comments').then(resp => {
+        if (resp.ok) {
+          return resp.json();
+        } else {
+          return resp.text().then(
+              text => Promise.reject(`Error ${resp.status}: ${text}`));
+        }
+      }).then(comments => {
+        console.log("Received comments: ");
+        console.log(comments);
 
-      removeCommentsOnPage();
-      comments.forEach((comment) => addCommentToPage(comment));  
-    })
-    .catch(err => {
-      console.error(err);
+        removeCommentsOnPage();
+        comments.forEach((comment) => addCommentToPage(comment));  
+      }).catch(err => {
+        console.error(err);
 
-      addNotification("Failed to populate the comments section!", 
-        "alert-danger");
-    });
+        addNotification(
+            "Failed to populate the comments section!", "alert-danger");
+      });
 }
 
 /**
@@ -74,7 +71,7 @@ function addCommentToPage(comment) {
 
 /**
  * Attempts to post a comment using the comment form data.
- * @param {SubmitEvent} event
+ * @param {Event} event
  */
 function attemptPostComment(event) {
   // Prevents the form submission from causing a browser refresh
@@ -87,26 +84,27 @@ function attemptPostComment(event) {
   // So use URLSearchParams to convert the data to the supported format
   const formData = new URLSearchParams(new FormData(commentForm)).toString();
 
-  fetch('/comments', {
+  const requestOptions = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     },
     body: formData
-  })
-    .then(resp => {
-      if (resp.ok) {
-        addNotification("Comment posted successfully!", "alert-success");
-        loadComments();
-      } else {
-        return resp.text()
-          .then(text => Promise.reject(`Error ${resp.status}: ${text}`));
-      }
-    })
-    .catch(err => {
-      console.error(err);
+  };
 
-      addNotification("Failed to post your comment! Please try again later.", 
-        "alert-danger");
-    });
+  fetch('/comments', requestOptions).then(resp => {
+        if (resp.ok) {
+          addNotification("Comment posted successfully!", "alert-success");
+          loadComments();
+        } else {
+          return resp.text().then(
+              text => Promise.reject(`Error ${resp.status}: ${text}`));
+        }
+      }).catch(err => {
+        console.error(err);
+
+        addNotification(
+            "Failed to post your comment! Please try again later.", 
+            "alert-danger");
+      });
 }
