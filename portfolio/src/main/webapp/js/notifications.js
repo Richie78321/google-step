@@ -9,12 +9,8 @@ function addNotification(msg, alertClass, displayTime = 10000) {
   const notificationContainer = document.getElementById("notification-container");
 
   const notificationElement = document.createElement("div");
-  notificationElement.classList.add("notification");
-  notificationElement.classList.add(alertClass);
-  notificationElement.classList.add("p-2");
-  notificationElement.classList.add("mb-2");
-  notificationElement.classList.add("w-100");
-
+  notificationElement.classList.add(
+      "notification", alertClass, "p-2", "mb-2", "w-100");
   notificationElement.innerText = msg;
 
   notificationContainer.appendChild(notificationElement);
