@@ -153,7 +153,7 @@ public class DataServlet extends HttpServlet {
    * Sends an error to the client as raw text instead of the default HTML page.
    */
   private void sendRawTextError(HttpServletResponse response, int errorCode, String errorMsg) 
-    throws IOException {
+      throws IOException {
     response.setStatus(errorCode);
     response.setContentType("text/html;");
     response.getWriter().println(errorMsg);
