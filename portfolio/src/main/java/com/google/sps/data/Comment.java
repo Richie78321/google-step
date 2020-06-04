@@ -19,8 +19,10 @@ public final class Comment {
 
   private final String author;
   private final String commentBody;
+  private long id = -1;
 
   /**
+    * Creates a new comment object without an ID.
     * @param author The author of the comment.
     * @param commentBody The text body of the comment.
     */
@@ -29,11 +31,31 @@ public final class Comment {
     this.commentBody = commentBody;
   }
 
+  /**
+    * Creates a new comment object with an ID.
+    * @param author The author of the comment.
+    * @param commentBody The text body of the comment.
+    * @param id The associated ID of the comment.
+    */
+  public Comment(String author, String commentBody, long id) {
+    this.author = author;
+    this.commentBody = commentBody;
+    this.id = id;
+  }
+
   public String getAuthor() {
     return author;
   }
 
   public String getCommentBody() {
     return commentBody;
+  }
+
+  public long getId() {
+    return id;
+  }
+
+  public void setId(long id) {
+    this.id = id;
   }
 }
