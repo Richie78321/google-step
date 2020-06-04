@@ -5,9 +5,9 @@
 
 .notification {
   opacity: 80%;
-  -moz-transition: opacity 1s linear, ;
-  -o-transition: opacity 1s linear;
   transition: opacity 1s linear;
+  -moz-transition: opacity 1s linear;
+  -o-transition: opacity 1s linear;
   -webkit-transition: opacity 1s linear;
   word-wrap: break-word;
 }
