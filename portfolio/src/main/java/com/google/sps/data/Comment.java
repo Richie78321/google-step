@@ -17,6 +17,8 @@ package com.google.sps.data;
 import com.google.appengine.api.datastore.Entity;
 import com.google.sps.helper.ValidationResult;
 import com.google.sps.servlets.DataServlet;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 /** Class containing comment data. */
@@ -55,22 +57,19 @@ public final class Comment {
    * @return Return the error string or null if there are no errors.
    */
   private static String validateIncomingComment(String commentAuthor, String commentBody) {
-    String validationErrors = "";
+    List<String> validationErrors = new ArrayList<String>();
 
     if (commentAuthor.isBlank()) {
-      validationErrors += "Please include a comment author (cannot be whitespace).";
+      validationErrors.add("Please include a comment author (cannot be whitespace).");
     }
     if (commentBody.isBlank()) {
-      if (validationErrors.length() > 0) {
-        validationErrors += " ";
-      }
-      validationErrors += "Please include a comment body (cannot be whitespace).";
+      validationErrors.add("Please include a comment body (cannot be whitespace).");
     }
 
     if (validationErrors.isEmpty()) {
       return null;
     } else {
-      return validationErrors;
+      return String.join(" ", validationErrors);
     }
   }
 

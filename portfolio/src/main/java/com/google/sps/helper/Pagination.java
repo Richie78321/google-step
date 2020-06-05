@@ -16,6 +16,8 @@ package com.google.sps.helper;
 
 import com.google.sps.helper.ValidationResult;
 import com.google.sps.servlets.DataServlet;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 public final class Pagination {
@@ -37,27 +39,24 @@ public final class Pagination {
     String pageNumParam = DataServlet.getParameter(request, PAGE_KEY, null);
     String numPerPageParam = DataServlet.getParameter(request, NUM_PER_PAGE_KEY, null);
 
-    String validationString = "";
+    List<String> validationErrors = new ArrayList<String>();
 
     Integer pageNum = tryParse(pageNumParam, 0);
     Integer numPerPage = tryParse(numPerPageParam, DEFAULT_NUM_PER_PAGE);
 
     if (pageNum == null) {
-      validationString += "Page number is not a valid number.";
+      validationErrors.add("Page number is not a valid number.");
     }
     if (numPerPage == null) {
-      if (validationString.length() > 0) {
-        validationString += " ";
-      }
-      validationString += "Number per page is not a valid number.";
+      validationErrors.add("Number per page is not a valid number.");
     }
 
-    if (validationString.length() > 0) {
-      return new ValidationResult<Pagination>(validationString);
-    }
-    else {
+    if (validationErrors.isEmpty()) {
       Pagination newPagination = new Pagination(pageNum, numPerPage);
       return new ValidationResult<Pagination>(newPagination);
+    }
+    else {
+      return new ValidationResult<Pagination>(String.join(" ", validationErrors));
     }
   }
 
