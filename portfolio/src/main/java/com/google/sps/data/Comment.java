@@ -75,11 +75,11 @@ public final class Comment {
 
   private final String author;
   private final String commentBody;
-  private final long id;
+  private long id;
   private final long timePosted;
 
   /**
-    * Creates a new comment object without an ID.
+    * Creates a new comment object.
     * @param author The author of the comment.
     * @param commentBody The text body of the comment.
     */
@@ -87,36 +87,9 @@ public final class Comment {
     this.author = author;
     this.commentBody = commentBody;
     this.id = -1;
-    this.timePosted = -1;
+    this.timePosted = System.currentTimeMillis();
   }
-
-  /**
-    * Creates a new comment object associated with a database entry.
-    * @param author The author of the comment.
-    * @param commentBody The text body of the comment.
-    * @param id The associated ID of the comment.
-    * @param timePosted The time the comment was posted to the database.
-    */
-  public Comment(String author, String commentBody, long id, long timePosted) {
-    this.author = author;
-    this.commentBody = commentBody;
-    this.id = id;
-    this.timePosted = timePosted;
-  }
-
-  /**
-    * Creates a new comment object associated with a database entry.
-    * @param comment
-    * @param id The associated ID of the comment.
-    * @param timePosted The time the comment was posted to the database.
-    */
-  public Comment(Comment comment, long id, long timePosted) {
-    this.author = comment.getAuthor();
-    this.commentBody = comment.getCommentBody();
-    this.id = id;
-    this.timePosted = timePosted;
-  }
-
+  
   /**
    * Creates a comment object from a database entry.
    * @param commentEntity
@@ -133,7 +106,6 @@ public final class Comment {
    * @param commentEntity
    */
   public void fillEntity(Entity commentEntity) {
-    long timePosted = System.currentTimeMillis();
     commentEntity.setProperty(AUTHOR_KEY, author);
     commentEntity.setProperty(BODY_KEY, commentBody);
     commentEntity.setProperty(TIME_POSTED_KEY, timePosted);
@@ -153,5 +125,9 @@ public final class Comment {
 
   public long getTimePosted() {
     return timePosted;
+  }
+
+  public void setId(long id) {
+    this.id = id;
   }
 }

@@ -106,7 +106,8 @@ public class DataServlet extends HttpServlet {
     comment.fillEntity(commentEntity);
 
     Key datastoreKey = datastore.put(commentEntity);
-    return new Comment(commentEntity);
+    comment.setId(datastoreKey.getId());
+    return comment;
   }
 
   /**
