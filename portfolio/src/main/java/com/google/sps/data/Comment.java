@@ -61,7 +61,9 @@ public final class Comment {
       validationErrors += "Please include a comment author (cannot be whitespace).";
     }
     if (commentBody.isBlank()) {
-      if (validationErrors.length() > 0) validationErrors += " ";
+      if (validationErrors.length() > 0) {
+        validationErrors += " ";
+      }
       validationErrors += "Please include a comment body (cannot be whitespace).";
     }
 
