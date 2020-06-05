@@ -63,11 +63,11 @@ public class DataServlet extends HttpServlet {
       return;
     }
 
-    Query allCommentsQuery = new Query("Comment")
+    Query sortedCommentsQuery = new Query("Comment")
         .addSort(Comment.TIME_POSTED_KEY, SortDirection.DESCENDING);
 
     Pagination commentPagination = paginationResult.getCreatedObject();
-    List<Comment> comments = queryCommentsDatastore(allCommentsQuery, commentPagination);
+    List<Comment> comments = queryCommentsDatastore(sortedCommentsQuery, commentPagination);
 
     String commentJson = gson.toJson(comments);
 
