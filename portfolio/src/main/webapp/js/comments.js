@@ -62,7 +62,8 @@ function addCommentToPage(comment) {
 
   const authorFooter = document.createElement("footer");
   authorFooter.classList.add("blockquote-footer");
-  authorFooter.innerText = comment.author;
+  const formattedTime = moment(comment.timePosted).fromNow();
+  authorFooter.innerText = `${comment.author}, ${formattedTime}`;
 
   newComment.appendChild(authorFooter);
   commentContainer.appendChild(newComment);

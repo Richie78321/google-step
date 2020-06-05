@@ -17,9 +17,14 @@ package com.google.sps.data;
 /** Class containing comment data. */
 public final class Comment {
 
+  public static final String AUTHOR_KEY = "author";
+  public static final String BODY_KEY = "comment-body";
+  public static final String TIME_POSTED_KEY = "timePosted";
+
   private final String author;
   private final String commentBody;
-  private long id = -1;
+  private final long id = -1;
+  private final long timePosted = -1;
 
   /**
     * Creates a new comment object without an ID.
@@ -32,15 +37,30 @@ public final class Comment {
   }
 
   /**
-    * Creates a new comment object with an ID.
+    * Creates a new comment object associated with a database entry.
     * @param author The author of the comment.
     * @param commentBody The text body of the comment.
     * @param id The associated ID of the comment.
+    * @param timePosted The time the comment was posted to the database.
     */
-  public Comment(String author, String commentBody, long id) {
+  public Comment(String author, String commentBody, long id, long timePosted) {
     this.author = author;
     this.commentBody = commentBody;
     this.id = id;
+    this.timePosted = timePosted;
+  }
+
+  /**
+    * Creates a new comment object associated with a database entry.
+    * @param comment
+    * @param id The associated ID of the comment.
+    * @param timePosted The time the comment was posted to the database.
+    */
+  public Comment(Comment comment, long id, long timePosted) {
+    this.author = comment.getAuthor();
+    this.commentBody = comment.getCommentBody();
+    this.id = id;
+    this.timePosted = timePosted;
   }
 
   public String getAuthor() {
@@ -55,7 +75,7 @@ public final class Comment {
     return id;
   }
 
-  public void setId(long id) {
-    this.id = id;
+  public long getTimePosted() {
+    return timePosted;
   }
 }

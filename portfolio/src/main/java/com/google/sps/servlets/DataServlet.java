@@ -20,6 +20,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.gson.Gson;
 import com.google.sps.data.Comment;
 import java.io.IOException;
@@ -42,7 +43,8 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    Query allCommentsQuery = new Query("Comment");
+    Query allCommentsQuery = 
+        new Query("Comment").addSort(Comment.TIME_POSTED_KEY, SortDirection.DESCENDING);
     List<Comment> comments = queryCommentsDatastore(allCommentsQuery);
 
     String commentJson = gson.toJson(comments);
@@ -54,8 +56,8 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    String commentAuthor = getParameter(request, "author", "");
-    String commentBody = getParameter(request, "comment-body", "");
+    String commentAuthor = getParameter(request, Comment.AUTHOR_KEY, "");
+    String commentBody = getParameter(request, Comment.BODY_KEY, "");
 
     commentAuthor = commentAuthor.replaceAll(UNSAFE_CHARACTERS_REGEX, "");
     commentBody = commentBody.replaceAll(UNSAFE_CHARACTERS_REGEX, "");
@@ -67,8 +69,7 @@ public class DataServlet extends HttpServlet {
     }
 
     Comment newComment = new Comment(commentAuthor, commentBody);
-    Key datastoreKey = addCommentToDatastore(newComment);
-    newComment.setId(datastoreKey.getId());
+    newComment = addCommentToDatastore(newComment);
 
     String commentJson = gson.toJson(newComment);
 
@@ -81,14 +82,18 @@ public class DataServlet extends HttpServlet {
 
   /**
    * Adds a comment to the datastore.
-   * @return Return the key of the new comment entity in the datastore.
+   * @return Return an updated comment object with information from the database entry.
    */
-  private Key addCommentToDatastore(Comment comment) {
-    Entity commentEntity = new Entity("Comment");
-    commentEntity.setProperty("author", comment.getAuthor());
-    commentEntity.setProperty("comment-body", comment.getCommentBody());
+  private Comment addCommentToDatastore(Comment comment) {
+    long timePosted = System.currentTimeMillis();
 
-    return datastore.put(commentEntity);
+    Entity commentEntity = new Entity("Comment");
+    commentEntity.setProperty(Comment.AUTHOR_KEY, comment.getAuthor());
+    commentEntity.setProperty(Comment.BODY_KEY, comment.getCommentBody());
+    commentEntity.setProperty(Comment.TIME_POSTED_KEY, timePosted);
+
+    Key datastoreKey = datastore.put(commentEntity);
+    return new Comment(comment, datastoreKey.getId(), timePosted);
   }
 
   /**
@@ -105,10 +110,11 @@ public class DataServlet extends HttpServlet {
     List<Comment> comments = new ArrayList<Comment>();
     for (Entity commentEntity : queryResults.asIterable()) {
       long id = commentEntity.getKey().getId();
-      String author = (String) commentEntity.getProperty("author");
-      String commentBody = (String) commentEntity.getProperty("comment-body");
+      String author = (String) commentEntity.getProperty(Comment.AUTHOR_KEY);
+      String commentBody = (String) commentEntity.getProperty(Comment.BODY_KEY);
+      long timePosted = (long) commentEntity.getProperty(Comment.TIME_POSTED_KEY);
 
-      Comment newComment = new Comment(author, commentBody, id);
+      Comment newComment = new Comment(author, commentBody, id, timePosted);
       comments.add(newComment);
     }
 
