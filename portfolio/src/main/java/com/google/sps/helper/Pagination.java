@@ -27,6 +27,9 @@ public final class Pagination {
 
   /**
    * Get and validate pagination options from an incoming request.
+   * 
+   * If either the page number parameter or the number per page parameter
+   * are not supplied, they are supplemented with default values.
    * @return Returns a pagination object or a validation error message.
    */
   public static ValidationResult<Pagination> getIncomingPagination(
