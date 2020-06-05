@@ -17,12 +17,15 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.gson.Gson;
 import com.google.sps.data.Comment;
+import com.google.sps.helper.Pagination;
+import com.google.sps.helper.ValidationResult;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,17 +38,36 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/comments")
 public class DataServlet extends HttpServlet {
 
-  // Whitelist to avoid the possibility of XSS
-  private final String UNSAFE_CHARACTERS_REGEX = "[^A-Za-z0-9._~()'!*:@,;+?\\s-]";
-
   DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
   private final Gson gson = new Gson();
 
+  /**
+   * @return Returns the request parameter associated with the inputted name,
+   * or returns the default value if the specified parameter is not defined.
+   */
+  public static String getParameter(HttpServletRequest request, String name, String defaultValue) {
+    String value = request.getParameter(name);
+    if (value == null) {
+      return defaultValue;
+    }
+    return value;
+  }
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    Query allCommentsQuery = 
-        new Query("Comment").addSort(Comment.TIME_POSTED_KEY, SortDirection.DESCENDING);
-    List<Comment> comments = queryCommentsDatastore(allCommentsQuery);
+    ValidationResult<Pagination> paginationResult = Pagination.getIncomingPagination(request);
+
+    if (paginationResult.hasValidationError()) {
+      sendRawTextError(
+          response, HttpServletResponse.SC_BAD_REQUEST, paginationResult.getValidationMessage());
+      return;
+    }
+
+    Query allCommentsQuery = new Query("Comment")
+        .addSort(Comment.TIME_POSTED_KEY, SortDirection.DESCENDING);
+
+    Pagination commentPagination = paginationResult.getCreatedObject();
+    List<Comment> comments = queryCommentsDatastore(allCommentsQuery, commentPagination);
 
     String commentJson = gson.toJson(comments);
 
@@ -56,28 +78,23 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    String commentAuthor = getParameter(request, Comment.AUTHOR_KEY, "");
-    String commentBody = getParameter(request, Comment.BODY_KEY, "");
 
-    commentAuthor = commentAuthor.replaceAll(UNSAFE_CHARACTERS_REGEX, "");
-    commentBody = commentBody.replaceAll(UNSAFE_CHARACTERS_REGEX, "");
-
-    String validationError = validateIncomingComment(commentAuthor, commentBody);
-    if (validationError != null) {
-      sendRawTextError(response, HttpServletResponse.SC_BAD_REQUEST, validationError);
+    ValidationResult<Comment> validationResult = Comment.getIncomingComment(request);
+    if (validationResult.hasValidationError()) {
+      sendRawTextError(
+          response, HttpServletResponse.SC_BAD_REQUEST, validationResult.getValidationMessage());
       return;
     }
 
-    Comment newComment = new Comment(commentAuthor, commentBody);
+    Comment newComment = validationResult.getCreatedObject();
     newComment = addCommentToDatastore(newComment);
 
     String commentJson = gson.toJson(newComment);
 
     // Return the new comment JSON as confirmation
-    response.setStatus(HttpServletResponse.SC_CREATED);
     response.setContentType("application/json;");
     response.getWriter().println(commentJson);
-    response.sendRedirect("/index.html");
+    response.setStatus(HttpServletResponse.SC_CREATED);
   }
 
   /**
@@ -85,74 +102,39 @@ public class DataServlet extends HttpServlet {
    * @return Return an updated comment object with information from the database entry.
    */
   private Comment addCommentToDatastore(Comment comment) {
-    long timePosted = System.currentTimeMillis();
-
     Entity commentEntity = new Entity("Comment");
-    commentEntity.setProperty(Comment.AUTHOR_KEY, comment.getAuthor());
-    commentEntity.setProperty(Comment.BODY_KEY, comment.getCommentBody());
-    commentEntity.setProperty(Comment.TIME_POSTED_KEY, timePosted);
+    comment.fillEntity(commentEntity);
 
     Key datastoreKey = datastore.put(commentEntity);
-    return new Comment(comment, datastoreKey.getId(), timePosted);
+    return new Comment(commentEntity);
   }
 
   /**
    * Queries comments from the datastore.
    * @return Return the resulting comments.
    */
-  private List<Comment> queryCommentsDatastore(Query commentsQuery) {
+  private List<Comment> queryCommentsDatastore(Query commentsQuery, Pagination pagination) {
     if (!commentsQuery.getKind().equals("Comment")) {
       throw new IllegalArgumentException("Query must be made to kind 'Comment'.");
     }
 
     PreparedQuery queryResults = datastore.prepare(commentsQuery);
 
-    List<Comment> comments = new ArrayList<Comment>();
-    for (Entity commentEntity : queryResults.asIterable()) {
-      long id = commentEntity.getKey().getId();
-      String author = (String) commentEntity.getProperty(Comment.AUTHOR_KEY);
-      String commentBody = (String) commentEntity.getProperty(Comment.BODY_KEY);
-      long timePosted = (long) commentEntity.getProperty(Comment.TIME_POSTED_KEY);
+    // Uses offset to implement pagination
+    // Offset is a very inefficient means of skipping elements, and if this application were
+    // anticipating a lot more load should instead use something like cursors:
+    // https://cloud.google.com/datastore/docs/concepts/queries#cursors_limits_and_offsets
+    FetchOptions fetchOptions = FetchOptions.Builder
+        .withOffset(pagination.getOffset())
+        .limit(pagination.getLimit());
 
-      Comment newComment = new Comment(author, commentBody, id, timePosted);
+    List<Comment> comments = new ArrayList<Comment>();
+    for (Entity commentEntity : queryResults.asIterable(fetchOptions)) {
+      Comment newComment = new Comment(commentEntity);
       comments.add(newComment);
     }
 
     return comments;
-  }
-
-  /**
-   * Validates the comment parameters of a new comment.
-   * @return Return the error string or null if there are no errors.
-   */
-  private String validateIncomingComment(String commentAuthor, String commentBody) {
-    String validationErrors = "";
-
-    if (commentAuthor.isBlank()) {
-      validationErrors += "Please include a comment author (cannot be whitespace).";
-    }
-    if (commentBody.isBlank()) {
-      if (validationErrors.length() > 0) validationErrors += " ";
-      validationErrors += "Please include a comment body (cannot be whitespace).";
-    }
-
-    if (validationErrors.isEmpty()) {
-      return null;
-    } else {
-      return validationErrors;
-    }
-  }
-
-  /**
-   * @return Returns the request parameter associated with the inputted name,
-   * or returns the default value if the specified parameter is not defined.
-   */
-  private String getParameter(HttpServletRequest request, String name, String defaultValue) {
-    String value = request.getParameter(name);
-    if (value == null) {
-      return defaultValue;
-    }
-    return value;
   }
 
   /**
