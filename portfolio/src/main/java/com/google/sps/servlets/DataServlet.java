@@ -87,7 +87,7 @@ public class DataServlet extends HttpServlet {
     }
 
     Comment newComment = validationResult.getCreatedObject();
-    newComment = addCommentToDatastore(newComment);
+    addCommentToDatastore(newComment);
 
     String commentJson = gson.toJson(newComment);
 
@@ -101,13 +101,12 @@ public class DataServlet extends HttpServlet {
    * Adds a comment to the datastore.
    * @return Return an updated comment object with information from the database entry.
    */
-  private Comment addCommentToDatastore(Comment comment) {
+  private void addCommentToDatastore(Comment comment) {
     Entity commentEntity = new Entity("Comment");
     comment.fillEntity(commentEntity);
 
     Key datastoreKey = datastore.put(commentEntity);
     comment.setId(datastoreKey.getId());
-    return comment;
   }
 
   /**
