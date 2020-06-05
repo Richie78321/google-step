@@ -17,8 +17,10 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
@@ -38,6 +40,8 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/comments")
 public class DataServlet extends HttpServlet {
 
+  private static String ID_KEY = "id";
+
   DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
   private final Gson gson = new Gson();
 
@@ -51,6 +55,23 @@ public class DataServlet extends HttpServlet {
       return defaultValue;
     }
     return value;
+  }
+
+  /**
+   * Attempts to parse an long string. Returns the default value if the string is null.
+   * @return The parsed value, default value, or null if parsing error.
+   */
+  public static Long tryParseLong(String numberString, Long defaultValue) {
+    if (numberString == null) {
+      return defaultValue;
+    }
+
+    try {
+      return Long.parseLong(numberString);
+    }
+    catch (NumberFormatException e) {
+      return null;
+    }
   }
 
   @Override
@@ -78,7 +99,6 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
     ValidationResult<Comment> validationResult = Comment.getIncomingComment(request);
     if (validationResult.hasValidationError()) {
       sendRawTextError(
@@ -95,6 +115,48 @@ public class DataServlet extends HttpServlet {
     response.setContentType("application/json;");
     response.getWriter().println(commentJson);
     response.setStatus(HttpServletResponse.SC_CREATED);
+  }
+
+  @Override
+  public void doDelete(HttpServletRequest request, HttpServletResponse response) 
+      throws IOException {
+    String idParameter = getParameter(request, ID_KEY, null);
+    if (idParameter == null) {
+      sendRawTextError(
+          response, HttpServletResponse.SC_BAD_REQUEST, "Please supply an ID.");
+      return;
+    }
+
+    Long idToDelete = tryParseLong(idParameter, null);
+    if (idToDelete == null) {
+      sendRawTextError(
+          response, HttpServletResponse.SC_BAD_REQUEST, "ID is an invalid number.");
+      return;
+    }
+
+    Key commentKey = KeyFactory.createKey("Comment", idToDelete);
+    Entity entityToDelete;
+    try {
+      entityToDelete = datastore.get(commentKey);
+    }
+    catch (EntityNotFoundException e) {
+      sendRawTextError(
+          response, 
+          HttpServletResponse.SC_BAD_REQUEST, 
+          "Comment with the specified ID does not exist.");
+      return;
+    }
+    catch (Exception e) {
+      throw e;
+    }
+
+    Comment commentToDelete = new Comment(entityToDelete);
+    datastore.delete(commentKey);
+
+    String commentJson = gson.toJson(commentToDelete);
+    response.setContentType("application/json;");
+    response.getWriter().println(commentJson);
+    response.setStatus(HttpServletResponse.SC_OK);
   }
 
   /**

@@ -41,8 +41,8 @@ public final class Pagination {
 
     List<String> validationErrors = new ArrayList<String>();
 
-    Integer pageNum = tryParse(pageNumParam, 0);
-    Integer numPerPage = tryParse(numPerPageParam, DEFAULT_NUM_PER_PAGE);
+    Integer pageNum = tryParseInt(pageNumParam, 0);
+    Integer numPerPage = tryParseInt(numPerPageParam, DEFAULT_NUM_PER_PAGE);
 
     if (pageNum == null) {
       validationErrors.add("Page number is not a valid number.");
@@ -64,7 +64,7 @@ public final class Pagination {
    * Attempts to parse an integer string. Returns the default value if the string is null.
    * @return The parsed value, default value, or null if parsing error.
    */
-  private static Integer tryParse(String numberString, int defaultValue) {
+  public static Integer tryParseInt(String numberString, Integer defaultValue) {
     if (numberString == null) {
       return defaultValue;
     }
