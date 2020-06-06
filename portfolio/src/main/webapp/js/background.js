@@ -270,7 +270,7 @@ class Ball {
    */
   _getRepellingForce(nearbyBalls) {
     const FORCE_BASE_MAGNITUDE = 20;
-    const MAX_FORCE = 0.05;
+    const MAX_FORCE = 0.5;
 
     const repellingForce = createVector(0, 0);
 
