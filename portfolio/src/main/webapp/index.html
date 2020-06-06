@@ -159,7 +159,7 @@
 
       <h3>Comments</h3>
       <div id="comment-section" class="mt-4 mb-5">
-        <div class="card p-4 mb-4">
+        <div class="card p-4 mb-2">
           <h4 class="text-center">Post your thoughts!</h4>
           <form id="comment-form" action="/comments" method="POST">
             <div class="form-group">
@@ -171,6 +171,21 @@
               <textarea class="form-control comment-input" name="comment-body" maxlength="120" required></textarea>
             </div>
             <button class="btn btn-primary" type="submit">Post</button>
+          </form>
+        </div>
+        <div class="card p-4 mb-4">
+          <form class="form-inline" id="comment-control">
+            <div class="form-group">
+              <button class="btn btn-primary" name="refresh">Refresh</button>
+            </div>
+            <div class="form-group ml-4">
+              <label for="numPerPage">Per Page:</label>
+              <input class="form-control ml-2" type="number" name="numPerPage" value="10" min="1" max="50" step="1">
+            </div>
+            <div class="form-group ml-4">
+              <label for="pageNum">Page Number:</label>
+              <input class="form-control ml-2" type="number" name="pageNum" value="1" min="1" max="1000" step="1">
+            </div>
           </form>
         </div>
         <div id="comment-container" class="d-flex flex-column"></div>

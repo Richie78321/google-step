@@ -7,6 +7,14 @@ function initCommentsSystem() {
   const commentForm = document.getElementById("comment-form");
   commentForm.addEventListener("submit", postComment);
 
+  const commentControl = document.getElementById("comment-control");
+  commentControl.addEventListener("change", loadComments);
+
+  commentControl.elements["refresh"].addEventListener("click", (event) => {
+    event.preventDefault();
+    loadComments();
+  });
+
   loadComments();
 }
 
@@ -15,7 +23,15 @@ function initCommentsSystem() {
  * and displays them in the comments section.
  */
 function loadComments() {
-  fetch('/comments').then(resp => {
+  const commentControl = document.getElementById("comment-control");
+  const loadUrl = 
+      new URL("/comments", `${location.protocol}//${location.hostname}`);
+  loadUrl.searchParams.set(
+      "numPerPage", commentControl.elements["numPerPage"].value);
+  loadUrl.searchParams.set(
+      "page", commentControl.elements["pageNum"].value)
+
+  fetch(loadUrl).then(resp => {
       if (resp.ok) {
         return resp.json();
       } else {
