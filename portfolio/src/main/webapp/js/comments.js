@@ -75,7 +75,7 @@ function addCommentToPage(comment) {
   const deleteButton = document.createElement("button");
   deleteButton.classList.add("btn", "btn-muted", "btn-sm", "ml-2");
   deleteButton.innerText = "Delete";
-  deleteButton.addEventListener("click", getCommentDeleter(comment.id));
+  deleteButton.addEventListener("click", createCommentDeleter(comment.id));
 
   authorFooter.appendChild(deleteButton);
 
@@ -125,11 +125,11 @@ function postComment(event) {
 }
 
 /**
- * Gets a function that sends a comment delete request.
+ * Creates a function that sends a comment delete request.
  * @param {number} id
  * @return Returns a function that deletes the comment associated with an ID.
  */
-function getCommentDeleter(id) {
+function createCommentDeleter(id) {
   return () => {
     const deleteUrl = 
         new URL("/comments", `${location.protocol}//${location.hostname}`);

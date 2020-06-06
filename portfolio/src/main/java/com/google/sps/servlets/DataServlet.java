@@ -146,9 +146,6 @@ public class DataServlet extends HttpServlet {
           "Comment with the specified ID does not exist.");
       return;
     }
-    catch (Exception e) {
-      throw e;
-    }
 
     Comment commentToDelete = new Comment(entityToDelete);
     datastore.delete(commentKey);
