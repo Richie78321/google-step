@@ -2,6 +2,7 @@
  * @fileoverview Creates a live visualization of balls that repel each other
  * and bounce off of the walls.
  */
+
 // This value is relatively arbitrary and just needs to be large enough to
 // support the pixel-based sizing of strokes in p5.js (meaning that values in
 // the magnitude of 10^0 or 10^1 will not work well).
@@ -15,6 +16,11 @@ const EFFECT_RADIUS = TANK_WIDTH * 0.1;
 const BALL_SIZE = TANK_WIDTH * 0.01;
 const NUM_BALLS = 25;
 const INITIAL_BALL_VELOCITY_MAGNITUDE = TANK_WIDTH * 0.0015;
+// This value controls how much of a ball's velocity is lost when it bounces
+// off of a wall. This acts as the system's energy sink in constrast to the
+// energy-adding repulsive force.
+const BALL_BOUNCE_VELOCITY_DAMPING = 0.02;
+
 /**
  * Runs initial set up of the background and background canvas.
  * 
@@ -235,17 +241,24 @@ class Ball {
    * @private
    */
   _bounceBounds (tank) {
-    if (this.position.x - tank.ballSize / 2 < 0) {
-      this.velocity.x = -this.velocity.x;
+    const velocityDampingMultiplier = (1 - BALL_BOUNCE_VELOCITY_DAMPING);
+
+    // Only negate velocities (bounce) if the ball is moving towards the wall.
+    if (this.velocity.x < 0 && 
+        this.position.x - tank.ballSize / 2 < 0) {
+      this.velocity.x = -this.velocity.x * velocityDampingMultiplier;
     }
-    else if (this.position.x + tank.ballSize / 2 > tank.width) {
-      this.velocity.x = -this.velocity.x;
+    else if (this.velocity.x > 0 && 
+        this.position.x + tank.ballSize / 2 > tank.width) {
+      this.velocity.x = -this.velocity.x * velocityDampingMultiplier;
     }
-    if (this.position.y - tank.ballSize / 2 < 0) {
-      this.velocity.y = -this.velocity.y;
+    if (this.velocity.y < 0 && 
+        this.position.y - tank.ballSize / 2 < 0) {
+      this.velocity.y = -this.velocity.y * velocityDampingMultiplier;
     }
-    else if (this.position.y + tank.ballSize / 2 > tank.height) {
-      this.velocity.y = -this.velocity.y;
+    else if (this.velocity.y > 0 && 
+        this.position.y + tank.ballSize / 2 > tank.height) {
+      this.velocity.y = -this.velocity.y * velocityDampingMultiplier;
     }
   }
 
