@@ -7,6 +7,14 @@ function initCommentsSystem() {
   const commentForm = document.getElementById("comment-form");
   commentForm.addEventListener("submit", postComment);
 
+  const commentControl = document.getElementById("comment-control");
+  commentControl.addEventListener("change", loadComments);
+
+  commentControl.elements["refresh"].addEventListener("click", (event) => {
+    event.preventDefault();
+    loadComments();
+  });
+
   loadComments();
 }
 
@@ -15,25 +23,33 @@ function initCommentsSystem() {
  * and displays them in the comments section.
  */
 function loadComments() {
-  fetch('/comments').then(resp => {
-      if (resp.ok) {
-        return resp.json();
-      } else {
-        return resp.text().then(
-            text => Promise.reject(`Error ${resp.status}: ${text}`));
-      }
-    }).then(comments => {
-      console.log("Received comments: ");
-      console.log(comments);
+  const commentControl = document.getElementById("comment-control");
+  const loadUrl = 
+      new URL("/comments", `${location.protocol}//${location.hostname}`);
+  loadUrl.searchParams.set(
+      "numPerPage", commentControl.elements["numPerPage"].value);
+  loadUrl.searchParams.set(
+      "page", commentControl.elements["pageNum"].value)
 
-      removeCommentsOnPage();
-      comments.forEach((comment) => addCommentToPage(comment));  
-    }).catch(err => {
-      console.error(err);
+  fetch(loadUrl).then(resp => {
+    if (resp.ok) {
+      return resp.json();
+    } else {
+      return resp.text().then(
+          text => Promise.reject(`Error ${resp.status}: ${text}`));
+    }
+  }).then(comments => {
+    console.log("Received comments: ");
+    console.log(comments);
 
-      addNotification(
-          "Failed to populate the comments section!", "alert-danger");
-    });
+    removeCommentsOnPage();
+    comments.forEach((comment) => addCommentToPage(comment));  
+  }).catch(err => {
+    console.error(err);
+
+    addNotification(
+        "Failed to populate the comments section!", "alert-danger");
+  });
 }
 
 /**
@@ -108,20 +124,20 @@ function postComment(event) {
   };
 
   fetch('/comments', requestOptions).then(resp => {
-      if (resp.ok) {
-        addNotification("Comment posted successfully!", "alert-success");
-        loadComments();
-      } else {
-        return resp.text().then(
-            text => Promise.reject(`Error ${resp.status}: ${text}`));
-      }
-    }).catch(err => {
-      console.error(err);
+    if (resp.ok) {
+      addNotification("Comment posted successfully!", "alert-success");
+      loadComments();
+    } else {
+      return resp.text().then(
+          text => Promise.reject(`Error ${resp.status}: ${text}`));
+    }
+  }).catch(err => {
+    console.error(err);
 
-      addNotification(
-          "Failed to post your comment! Please try again later.", 
-          "alert-danger");
-    });
+    addNotification(
+        "Failed to post your comment! Please try again later.", 
+        "alert-danger");
+  });
 }
 
 /**

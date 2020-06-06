@@ -26,6 +26,7 @@ public final class Pagination {
   public static final String NUM_PER_PAGE_KEY = "numPerPage";
 
   private static final int DEFAULT_NUM_PER_PAGE = 10;
+  private static final int MAX_NUM_PER_PAGE = 50;
 
   /**
    * Get and validate pagination options from an incoming request.
@@ -41,15 +42,23 @@ public final class Pagination {
 
     List<String> validationErrors = new ArrayList<String>();
 
-    Integer pageNum = tryParseInt(pageNumParam, 0);
+    Integer pageNum = tryParseInt(pageNumParam, 1);
     Integer numPerPage = tryParseInt(numPerPageParam, DEFAULT_NUM_PER_PAGE);
 
     if (pageNum == null) {
       validationErrors.add("Page number is not a valid number.");
+    } else if (pageNum < 1) {
+      validationErrors.add("Page number must be greater than zero.");
     }
     if (numPerPage == null) {
       validationErrors.add("Number per page is not a valid number.");
     }
+    else if (numPerPage < 1 || numPerPage > MAX_NUM_PER_PAGE) {
+      validationErrors.add("Number per page must be between 1 and " + MAX_NUM_PER_PAGE);
+    }
+    
+    // Make page number zero-based
+    pageNum--;
 
     if (validationErrors.isEmpty()) {
       Pagination newPagination = new Pagination(pageNum, numPerPage);

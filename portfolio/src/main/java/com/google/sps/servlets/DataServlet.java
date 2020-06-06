@@ -84,11 +84,11 @@ public class DataServlet extends HttpServlet {
       return;
     }
 
-    Query allCommentsQuery = new Query("Comment")
+    Query sortedCommentsQuery = new Query("Comment")
         .addSort(Comment.TIME_POSTED_KEY, SortDirection.DESCENDING);
 
     Pagination commentPagination = paginationResult.getCreatedObject();
-    List<Comment> comments = queryCommentsDatastore(allCommentsQuery, commentPagination);
+    List<Comment> comments = queryCommentsDatastore(sortedCommentsQuery, commentPagination);
 
     String commentJson = gson.toJson(comments);
 
@@ -107,7 +107,7 @@ public class DataServlet extends HttpServlet {
     }
 
     Comment newComment = validationResult.getCreatedObject();
-    newComment = addCommentToDatastore(newComment);
+    addCommentToDatastore(newComment);
 
     String commentJson = gson.toJson(newComment);
 
@@ -160,12 +160,12 @@ public class DataServlet extends HttpServlet {
    * Adds a comment to the datastore.
    * @return Return an updated comment object with information from the database entry.
    */
-  private Comment addCommentToDatastore(Comment comment) {
+  private void addCommentToDatastore(Comment comment) {
     Entity commentEntity = new Entity("Comment");
     comment.fillEntity(commentEntity);
 
     Key datastoreKey = datastore.put(commentEntity);
-    return new Comment(commentEntity);
+    comment.setId(datastoreKey.getId());
   }
 
   /**
