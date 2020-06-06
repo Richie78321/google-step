@@ -32,24 +32,24 @@ function loadComments() {
       "page", commentControl.elements["pageNum"].value)
 
   fetch(loadUrl).then(resp => {
-      if (resp.ok) {
-        return resp.json();
-      } else {
-        return resp.text().then(
-            text => Promise.reject(`Error ${resp.status}: ${text}`));
-      }
-    }).then(comments => {
-      console.log("Received comments: ");
-      console.log(comments);
+    if (resp.ok) {
+      return resp.json();
+    } else {
+      return resp.text().then(
+          text => Promise.reject(`Error ${resp.status}: ${text}`));
+    }
+  }).then(comments => {
+    console.log("Received comments: ");
+    console.log(comments);
 
-      removeCommentsOnPage();
-      comments.forEach((comment) => addCommentToPage(comment));  
-    }).catch(err => {
-      console.error(err);
+    removeCommentsOnPage();
+    comments.forEach((comment) => addCommentToPage(comment));  
+  }).catch(err => {
+    console.error(err);
 
-      addNotification(
-          "Failed to populate the comments section!", "alert-danger");
-    });
+    addNotification(
+        "Failed to populate the comments section!", "alert-danger");
+  });
 }
 
 /**
@@ -109,18 +109,18 @@ function postComment(event) {
   };
 
   fetch('/comments', requestOptions).then(resp => {
-      if (resp.ok) {
-        addNotification("Comment posted successfully!", "alert-success");
-        loadComments();
-      } else {
-        return resp.text().then(
-            text => Promise.reject(`Error ${resp.status}: ${text}`));
-      }
-    }).catch(err => {
-      console.error(err);
+    if (resp.ok) {
+      addNotification("Comment posted successfully!", "alert-success");
+      loadComments();
+    } else {
+      return resp.text().then(
+          text => Promise.reject(`Error ${resp.status}: ${text}`));
+    }
+  }).catch(err => {
+    console.error(err);
 
-      addNotification(
-          "Failed to post your comment! Please try again later.", 
-          "alert-danger");
-    });
+    addNotification(
+        "Failed to post your comment! Please try again later.", 
+        "alert-danger");
+  });
 }
