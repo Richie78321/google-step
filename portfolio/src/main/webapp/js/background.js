@@ -17,7 +17,7 @@ const BALL_SIZE = TANK_WIDTH * 0.01;
 const NUM_BALLS = 25;
 const INITIAL_BALL_VELOCITY_MAGNITUDE = TANK_WIDTH * 0.0015;
 // This value controls how much of a ball's velocity is lost when it bounces
-// off of a wall. This acts as the system's energy sink in constrast to the
+// off of a wall. This acts as the system's energy sink in contrast to the
 // energy-adding repulsive force.
 const BALL_BOUNCE_VELOCITY_DAMPING = 0.02;
 
