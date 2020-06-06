@@ -58,7 +58,7 @@ public class DataServlet extends HttpServlet {
   }
 
   /**
-   * Attempts to parse an long string. Returns the default value if the string is null.
+   * Attempts to convert a string into a long. Returns the default value if the string is null.
    * @return The parsed value, default value, or null if parsing error.
    */
   public static Long tryParseLong(String numberString, Long defaultValue) {
