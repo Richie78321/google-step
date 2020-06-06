@@ -7,6 +7,14 @@ function initCommentsSystem() {
   const commentForm = document.getElementById("comment-form");
   commentForm.addEventListener("submit", postComment);
 
+  const commentControl = document.getElementById("comment-control");
+  commentControl.addEventListener("change", loadComments);
+
+  commentControl.elements["refresh"].addEventListener("click", (event) => {
+    event.preventDefault();
+    loadComments();
+  });
+
   loadComments();
 }
 
@@ -15,25 +23,33 @@ function initCommentsSystem() {
  * and displays them in the comments section.
  */
 function loadComments() {
-  fetch('/comments').then(resp => {
-      if (resp.ok) {
-        return resp.json();
-      } else {
-        return resp.text().then(
-            text => Promise.reject(`Error ${resp.status}: ${text}`));
-      }
-    }).then(comments => {
-      console.log("Received comments: ");
-      console.log(comments);
+  const commentControl = document.getElementById("comment-control");
+  const loadUrl = 
+      new URL("/comments", `${location.protocol}//${location.hostname}`);
+  loadUrl.searchParams.set(
+      "numPerPage", commentControl.elements["numPerPage"].value);
+  loadUrl.searchParams.set(
+      "page", commentControl.elements["pageNum"].value)
 
-      removeCommentsOnPage();
-      comments.forEach((comment) => addCommentToPage(comment));  
-    }).catch(err => {
-      console.error(err);
+  fetch(loadUrl).then(resp => {
+    if (resp.ok) {
+      return resp.json();
+    } else {
+      return resp.text().then(
+          text => Promise.reject(`Error ${resp.status}: ${text}`));
+    }
+  }).then(comments => {
+    console.log("Received comments: ");
+    console.log(comments);
 
-      addNotification(
-          "Failed to populate the comments section!", "alert-danger");
-    });
+    removeCommentsOnPage();
+    comments.forEach((comment) => addCommentToPage(comment));  
+  }).catch(err => {
+    console.error(err);
+
+    addNotification(
+        "Failed to populate the comments section!", "alert-danger");
+  });
 }
 
 /**
@@ -50,8 +66,15 @@ function removeCommentsOnPage() {
 }
 
 /**
+ * @typedef {Object} Comment
+ * @property {string} author
+ * @property {string} commentBody
+ * @property {number} id
+ * @property {number} timePosted Time the comment was posted in unix timestamp.
+ */
+/**
  * Adds a comment to the comments section UI.
- * @param {{author: string, commentBody: string}} comment
+ * @param {Comment} comment
  */
 function addCommentToPage(comment) {
   const commentContainer = document.getElementById("comment-container");
@@ -65,7 +88,15 @@ function addCommentToPage(comment) {
   const formattedTime = moment(comment.timePosted).fromNow();
   authorFooter.innerText = `${comment.author}, ${formattedTime}`;
 
+  const deleteButton = document.createElement("button");
+  deleteButton.classList.add("btn", "btn-muted", "btn-sm", "ml-2");
+  deleteButton.innerText = "Delete";
+  deleteButton.addEventListener("click", createCommentDeleter(comment.id));
+
+  authorFooter.appendChild(deleteButton);
+
   newComment.appendChild(authorFooter);
+
   commentContainer.appendChild(newComment);
 }
 
@@ -93,18 +124,47 @@ function postComment(event) {
   };
 
   fetch('/comments', requestOptions).then(resp => {
-      if (resp.ok) {
-        addNotification("Comment posted successfully!", "alert-success");
-        loadComments();
-      } else {
-        return resp.text().then(
-            text => Promise.reject(`Error ${resp.status}: ${text}`));
-      }
-    }).catch(err => {
-      console.error(err);
+    if (resp.ok) {
+      addNotification("Comment posted successfully!", "alert-success");
+      loadComments();
+    } else {
+      return resp.text().then(
+          text => Promise.reject(`Error ${resp.status}: ${text}`));
+    }
+  }).catch(err => {
+    console.error(err);
 
-      addNotification(
-          "Failed to post your comment! Please try again later.", 
+    addNotification(
+        "Failed to post your comment! Please try again later.", 
+        "alert-danger");
+  });
+}
+
+/**
+ * Creates a function that sends a comment delete request.
+ * @param {number} id
+ * @return Returns a function that deletes the comment associated with an ID.
+ */
+function createCommentDeleter(id) {
+  return () => {
+    const deleteUrl = 
+        new URL("/comments", `${location.protocol}//${location.hostname}`);
+    deleteUrl.searchParams.set("id", id);
+
+    fetch(deleteUrl, { method: 'DELETE' }).then((resp) => {
+        if (resp.ok) {
+          addNotification("Comment deleted successfully.", "alert-success");
+          loadComments();
+        } else {
+          return resp.text().then(
+              text => Promise.reject(`Error ${resp.status}: ${text}`));
+        }
+      }).catch(err => {
+        console.log(err);
+
+        addNotification(
+          "Failed to delete the comment! Please try again later.", 
           "alert-danger");
-    });
+      });
+  };
 }
