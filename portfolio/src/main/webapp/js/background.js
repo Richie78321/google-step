@@ -2,11 +2,19 @@
  * @fileoverview Creates a live visualization of balls that repel each other
  * and bounce off of the walls.
  */
-const HEIGHT_TO_WIDTH = 0.3;
-const EFFECT_RADIUS_TO_WIDTH = 0.1;
-const BALL_SIZE_TO_WIDTH = 0.01;
+// This value is relatively arbitrary and just needs to be large enough to
+// support the pixel-based sizing of strokes in p5.js (meaning that values in
+// the magnitude of 10^0 or 10^1 will not work well).
+// There are very few reasons to change this value, as some things will need to
+// be rebalanced (like the inverse-square force law) if it is.
+const TANK_WIDTH = 1000;
+
+// Feel free to change these values.
+const TANK_HEIGHT = TANK_WIDTH * 0.3;
+const EFFECT_RADIUS = TANK_WIDTH * 0.1;
+const BALL_SIZE = TANK_WIDTH * 0.01;
 const NUM_BALLS = 25;
-const INITIAL_BALL_VELOCITY_MAGNITUDE = 1;
+const INITIAL_BALL_VELOCITY_MAGNITUDE = TANK_WIDTH * 0.0015;
 /**
  * Runs initial set up of the background and background canvas.
  * 
@@ -16,9 +24,10 @@ const INITIAL_BALL_VELOCITY_MAGNITUDE = 1;
 function setup() {
   const backgroundContainer = document.getElementById("background-container");
 
+  const tankHeightToWidth = TANK_HEIGHT / TANK_WIDTH;
   const backgroundCanvas =
     createCanvas(backgroundContainer.clientWidth,
-      backgroundContainer.clientWidth * HEIGHT_TO_WIDTH);
+      backgroundContainer.clientWidth * tankHeightToWidth);
   backgroundCanvas.parent("background-container");
 
   frameRate(60);
@@ -31,8 +40,7 @@ let ballTank;
  * Initializes a tank for the background.
  */
 function initTank() {
-  const ballSize = BALL_SIZE_TO_WIDTH * width;
-  ballTank = new Tank(width, height, EFFECT_RADIUS_TO_WIDTH * width, ballSize);
+  ballTank = new Tank(TANK_WIDTH, TANK_HEIGHT, EFFECT_RADIUS, BALL_SIZE);
 
   // Create balls and add them to the tank.
   // Each start with random positions and velocities.
@@ -57,9 +65,10 @@ function initTank() {
  * https://p5js.org/reference/#/p5/windowResized
  */
 function windowResized() {
-  const canvasContainer = document.getElementById("background-container");
-  resizeCanvas(canvasContainer.clientWidth,
-    canvasContainer.clientWidth * HEIGHT_TO_WIDTH);
+  const backgroundContainer = document.getElementById("background-container");
+  const tankHeightToWidth = TANK_HEIGHT / TANK_WIDTH;
+  resizeCanvas(backgroundContainer.clientWidth,
+    backgroundContainer.clientWidth * tankHeightToWidth);
 }
 
 /**
@@ -72,6 +81,10 @@ function windowResized() {
 function draw() {
   const grayScaleColor = 255; // white
   background(grayScaleColor);
+
+  // Scale the tank to the screen
+  scale(width / ballTank.width);
+
   ballTank.update();
   ballTank.drawBalls();
 }
@@ -244,7 +257,7 @@ class Ball {
    */
   _getRepellingForce(nearbyBalls) {
     const FORCE_BASE_MAGNITUDE = 20;
-    const MAX_FORCE = 0.5;
+    const MAX_FORCE = 0.05;
 
     const repellingForce = createVector(0, 0);
 
