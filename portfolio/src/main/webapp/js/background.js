@@ -11,7 +11,8 @@
 const TANK_WIDTH = 1000;
 
 // Feel free to change these values.
-const TANK_HEIGHT = TANK_WIDTH * 0.3;
+const TANK_HEIGHT_TO_WIDTH = 0.3;
+const TANK_HEIGHT = TANK_WIDTH * TANK_HEIGHT_TO_WIDTH;
 const EFFECT_RADIUS = TANK_WIDTH * 0.1;
 const BALL_SIZE = TANK_WIDTH * 0.01;
 const NUM_BALLS = 25;
@@ -19,7 +20,7 @@ const INITIAL_BALL_VELOCITY_MAGNITUDE = TANK_WIDTH * 0.0015;
 // This value controls how much of a ball's velocity is lost when it bounces
 // off of a wall. This acts as the system's energy sink in contrast to the
 // energy-adding repulsive force.
-const BALL_BOUNCE_VELOCITY_DAMPING = 0.02;
+const BALL_BOUNCE_VELOCITY_DAMPING = 1 - 0.02;
 
 /**
  * Runs initial set up of the background and background canvas.
@@ -30,10 +31,9 @@ const BALL_BOUNCE_VELOCITY_DAMPING = 0.02;
 function setup() {
   const backgroundContainer = document.getElementById("background-container");
 
-  const tankHeightToWidth = TANK_HEIGHT / TANK_WIDTH;
   const backgroundCanvas =
     createCanvas(backgroundContainer.clientWidth,
-      backgroundContainer.clientWidth * tankHeightToWidth);
+      backgroundContainer.clientWidth * TANK_HEIGHT_TO_WIDTH);
   backgroundCanvas.parent("background-container");
 
   frameRate(60);
@@ -51,8 +51,8 @@ function initTank() {
   // Create balls and add them to the tank.
   // Each start with random positions and velocities.
   for (let i = 0; i < NUM_BALLS; i++) {
-    const randomPosition = createVector(Math.random() * ballTank.width,
-      Math.random() * ballTank.height);
+    const randomPosition = createVector(
+        Math.random() * ballTank.width, Math.random() * ballTank.height);
 
     // Gets a random vector on the unit circle as to randomize 
     // the initial velocity direction.
@@ -72,9 +72,9 @@ function initTank() {
  */
 function windowResized() {
   const backgroundContainer = document.getElementById("background-container");
-  const tankHeightToWidth = TANK_HEIGHT / TANK_WIDTH;
-  resizeCanvas(backgroundContainer.clientWidth,
-    backgroundContainer.clientWidth * tankHeightToWidth);
+  resizeCanvas(
+      backgroundContainer.clientWidth,
+      backgroundContainer.clientWidth * TANK_HEIGHT_TO_WIDTH);
 }
 
 /**
@@ -208,9 +208,10 @@ class Ball {
      * The color of the ball.
      * @type {p5.Color} @const
      */
-    this.color = color(Math.floor(Math.random() * 256),
-      Math.floor(Math.random() * 256),
-      Math.floor(Math.random() * 256));
+    this.color = color(
+        Math.floor(Math.random() * 256),
+        Math.floor(Math.random() * 256),
+        Math.floor(Math.random() * 256));
   }
 
   /**
@@ -241,24 +242,22 @@ class Ball {
    * @private
    */
   _bounceBounds (tank) {
-    const velocityDampingMultiplier = (1 - BALL_BOUNCE_VELOCITY_DAMPING);
-
     // Only negate velocities (bounce) if the ball is moving towards the wall.
     if (this.velocity.x < 0 && 
         this.position.x - tank.ballSize / 2 < 0) {
-      this.velocity.x = -this.velocity.x * velocityDampingMultiplier;
+      this.velocity.x = -this.velocity.x * BALL_BOUNCE_VELOCITY_DAMPING;
     }
     else if (this.velocity.x > 0 && 
         this.position.x + tank.ballSize / 2 > tank.width) {
-      this.velocity.x = -this.velocity.x * velocityDampingMultiplier;
+      this.velocity.x = -this.velocity.x * BALL_BOUNCE_VELOCITY_DAMPING;
     }
     if (this.velocity.y < 0 && 
         this.position.y - tank.ballSize / 2 < 0) {
-      this.velocity.y = -this.velocity.y * velocityDampingMultiplier;
+      this.velocity.y = -this.velocity.y * BALL_BOUNCE_VELOCITY_DAMPING;
     }
     else if (this.velocity.y > 0 && 
         this.position.y + tank.ballSize / 2 > tank.height) {
-      this.velocity.y = -this.velocity.y * velocityDampingMultiplier;
+      this.velocity.y = -this.velocity.y * BALL_BOUNCE_VELOCITY_DAMPING;
     }
   }
 
