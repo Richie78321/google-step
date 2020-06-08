@@ -1,9 +1,26 @@
+let commentAuthData = null;
 /**
  * Initializes the comment system.
- *
- * Adds a submission event listener to the comment form and loads the comments.
  */
 function initCommentsSystem() {
+  getAuthorization().then(() => {
+    applyAuthorizationToUI();
+    loadComments();
+  }).catch((err) => {
+    console.error(err);
+
+    addNotification(
+        "Failed to determine comment authentication! Please try again later", 
+        "alert-danger");
+  });
+
+  initCommentControls();
+}
+
+/**
+ * Initializes the control event handlers for posting and viewing comments.
+ */
+function initCommentControls() {
   const commentForm = document.getElementById("comment-form");
   commentForm.addEventListener("submit", postComment);
 
@@ -14,8 +31,42 @@ function initCommentsSystem() {
     event.preventDefault();
     loadComments();
   });
+}
 
-  loadComments();
+/**
+ * Updates the comments UI according to user authorization. 
+ */
+function applyAuthorizationToUI() {
+  if (commentAuthData.authorized) {
+    const withAuthElements = 
+        Array.from(document.getElementsByClassName("only-display-with-auth"));
+    withAuthElements.forEach((elem) => elem.style.display = "inherit");
+  } else {
+    const withoutAuthElements = Array.from(
+        document.getElementsByClassName("only-display-without-auth"));
+    withoutAuthElements.forEach((elem) => elem.style.display = "inherit");
+    
+    const loginButton = document.getElementById("comment-auth-login");
+    loginButton.href = commentAuthData.loginUrl;
+  }
+}
+
+/**
+ * Gets the user's authorization status.
+ */
+function getAuthorization() {
+  return fetch('/auth').then((resp) => {
+    if (resp.ok) {
+      return resp.json();
+    } else {
+      return resp.text().then(
+          text => Promise.reject(`Error ${resp.status}: ${text}`));
+    }
+  }).then((authData) => {
+    console.log("Got comment authorization:");
+    console.log(authData);
+    commentAuthData = authData;
+  });
 }
 
 /**
