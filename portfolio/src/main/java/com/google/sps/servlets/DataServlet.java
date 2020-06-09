@@ -24,6 +24,9 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
 import com.google.sps.data.Comment;
 import com.google.sps.helper.Pagination;
@@ -36,7 +39,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/comments")
 public class DataServlet extends HttpServlet {
 
@@ -99,7 +101,17 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    ValidationResult<Comment> validationResult = Comment.getIncomingComment(request);
+    UserService userService = UserServiceFactory.getUserService();
+    if (!userService.isUserLoggedIn()) {
+      sendRawTextError(
+          response, HttpServletResponse.SC_UNAUTHORIZED, "Must be logged in to post a comment.");
+      return;
+    }
+
+    User currentUser = userService.getCurrentUser();
+
+    ValidationResult<Comment> validationResult = 
+        Comment.getIncomingComment(request, currentUser.getUserId());
     if (validationResult.hasValidationError()) {
       sendRawTextError(
           response, HttpServletResponse.SC_BAD_REQUEST, validationResult.getValidationMessage());
@@ -120,6 +132,13 @@ public class DataServlet extends HttpServlet {
   @Override
   public void doDelete(HttpServletRequest request, HttpServletResponse response) 
       throws IOException {
+    UserService userService = UserServiceFactory.getUserService();
+    if (!userService.isUserLoggedIn()) {
+      sendRawTextError(
+          response, HttpServletResponse.SC_UNAUTHORIZED, "Must be logged in to delete a comment.");
+      return;
+    }
+    
     String idParameter = getParameter(request, ID_KEY, null);
     if (idParameter == null) {
       sendRawTextError(
@@ -148,6 +167,15 @@ public class DataServlet extends HttpServlet {
     }
 
     Comment commentToDelete = new Comment(entityToDelete);
+    User currentUser = userService.getCurrentUser();
+    if (!currentUser.getUserId().equals(commentToDelete.getPosterId())) {
+      sendRawTextError(
+          response, 
+          HttpServletResponse.SC_FORBIDDEN, 
+          "Cannot delete a comment from another user.");
+      return;
+    }
+
     datastore.delete(commentKey);
 
     String commentJson = gson.toJson(commentToDelete);

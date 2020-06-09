@@ -1,9 +1,37 @@
 /**
+ * @typedef {Object} AuthData
+ * @property {string} loginUrl The URL to log in.
+ * @property {boolean} authorized Whether the user is currently authorized.
+ * @property {{string: email, string: id}} [user] Information about the 
+ * current authorized user. Only present if the user is authorized.
+ */
+/**
+ * @type {AuthData}
+ */
+let commentAuthData = null;
+
+/**
  * Initializes the comment system.
- *
- * Adds a submission event listener to the comment form and loads the comments.
  */
 function initCommentsSystem() {
+  getAuthorization().then(() => {
+    applyAuthorizationToUI();
+    loadComments();
+  }).catch((err) => {
+    console.error(err);
+
+    addNotification(
+        "Failed to determine comment authentication! Please try again later", 
+        "alert-danger");
+  });
+
+  initCommentControls();
+}
+
+/**
+ * Initializes the control event handlers for posting and viewing comments.
+ */
+function initCommentControls() {
   const commentForm = document.getElementById("comment-form");
   commentForm.addEventListener("submit", postComment);
 
@@ -14,8 +42,39 @@ function initCommentsSystem() {
     event.preventDefault();
     loadComments();
   });
+}
 
-  loadComments();
+/**
+ * Updates the comments UI according to user authorization. 
+ */
+function applyAuthorizationToUI() {
+  if (commentAuthData.authorized) {
+    const withAuthElements = 
+        Array.from(document.getElementsByClassName("only-display-with-auth"));
+    // Make authorization-only UI visible
+    withAuthElements.forEach((elem) => elem.style.display = "inherit");
+  } else {
+    const withoutAuthElements = Array.from(
+        document.getElementsByClassName("only-display-without-auth"));
+    // Make no-authorization-only UI visible
+    withoutAuthElements.forEach((elem) => elem.style.display = "inherit");
+    
+    const loginButton = document.getElementById("comment-auth-login");
+    loginButton.href = commentAuthData.loginUrl;
+  }
+}
+
+/**
+ * Gets the user's authorization status.
+ * @return {Promise} Returns a promise that fetches the user's 
+ * authorization data {@link AuthData}.
+ */
+function getAuthorization() {
+  return formatFetchResponse(fetch('/auth')).then((authData) => {
+    console.log("Got comment authorization:");
+    console.log(authData);
+    commentAuthData = authData;
+  });
 }
 
 /**
@@ -31,14 +90,7 @@ function loadComments() {
   loadUrl.searchParams.set(
       "page", commentControl.elements["pageNum"].value)
 
-  fetch(loadUrl).then(resp => {
-    if (resp.ok) {
-      return resp.json();
-    } else {
-      return resp.text().then(
-          text => Promise.reject(`Error ${resp.status}: ${text}`));
-    }
-  }).then(comments => {
+  formatFetchResponse(fetch(loadUrl)).then(comments => {
     console.log("Received comments: ");
     console.log(comments);
 
@@ -123,14 +175,9 @@ function postComment(event) {
     body: formData
   };
 
-  fetch('/comments', requestOptions).then(resp => {
-    if (resp.ok) {
-      addNotification("Comment posted successfully!", "alert-success");
-      loadComments();
-    } else {
-      return resp.text().then(
-          text => Promise.reject(`Error ${resp.status}: ${text}`));
-    }
+  formatFetchResponse(fetch('/comments', requestOptions)).then(() => {
+    addNotification("Comment posted successfully!", "alert-success");
+    loadComments();
   }).catch(err => {
     console.error(err);
 
@@ -151,20 +198,34 @@ function createCommentDeleter(id) {
         new URL("/comments", `${location.protocol}//${location.hostname}`);
     deleteUrl.searchParams.set("id", id);
 
-    fetch(deleteUrl, { method: 'DELETE' }).then((resp) => {
-        if (resp.ok) {
-          addNotification("Comment deleted successfully.", "alert-success");
-          loadComments();
-        } else {
-          return resp.text().then(
-              text => Promise.reject(`Error ${resp.status}: ${text}`));
-        }
-      }).catch(err => {
+    formatFetchResponse(fetch(deleteUrl, { method: 'DELETE' })).then(() => {
+      addNotification("Comment deleted successfully.", "alert-success");
+      loadComments();
+    }).catch(err => {
         console.log(err);
 
         addNotification(
           "Failed to delete the comment! Please try again later.", 
           "alert-danger");
-      });
+    });
   };
+}
+
+/**
+ * Formats the fetch response according to the portfolio's API.
+ * 
+ * If the response is okay, the response format is JSON. Otherwise the error 
+ * message is formatted as raw text and the promise is rejected.
+ * @param {Promise} fetchRequest Fetch request to portfolio API.
+ * @return {Promise}
+ */
+function formatFetchResponse(fetchRequest) {
+  return fetch.then((resp) => {
+    if (resp.ok) {
+      return resp.json();
+    } else {
+      return resp.text().then(
+          text => Promise.reject(`Error ${resp.status}: ${text}`));
+    }
+  });
 }
