@@ -30,13 +30,15 @@ public final class Comment {
   public static final String AUTHOR_KEY = "author";
   public static final String BODY_KEY = "comment-body";
   public static final String TIME_POSTED_KEY = "timePosted";
+  public static final String POSTER_ID_KEY = "posterId";
   
   /**
    * Get and validate a comment object from an incoming request.
    * @param request
    * @return Returns a new comment object or a validation error message.
    */
-  public static ValidationResult<Comment> getIncomingComment(HttpServletRequest request) {
+  public static ValidationResult<Comment> getIncomingComment(
+      HttpServletRequest request, User sender) {
     String commentAuthor = DataServlet.getParameter(request, AUTHOR_KEY, "");
     String commentBody = DataServlet.getParameter(request, BODY_KEY, "");
 
@@ -47,7 +49,7 @@ public final class Comment {
     if (validationError != null) {
       return new ValidationResult<Comment>(validationError);
     } else {
-      Comment newComment = new Comment(commentAuthor, commentBody);
+      Comment newComment = new Comment(commentAuthor, commentBody, sender.getUserId());
       return new ValidationResult<Comment>(newComment);
     }
   }
@@ -77,17 +79,19 @@ public final class Comment {
   private final String commentBody;
   private long id;
   private final long timePosted;
+  private final String posterId;
 
   /**
     * Creates a new comment object.
     * @param author The author of the comment.
     * @param commentBody The text body of the comment.
     */
-  public Comment(String author, String commentBody) {
+  public Comment(String author, String commentBody, String posterId) {
     this.author = author;
     this.commentBody = commentBody;
     this.id = -1;
     this.timePosted = System.currentTimeMillis();
+    this.posterId = posterId;
   }
   
   /**
@@ -99,6 +103,7 @@ public final class Comment {
     this.author = (String) commentEntity.getProperty(AUTHOR_KEY);
     this.commentBody = (String) commentEntity.getProperty(BODY_KEY);
     this.timePosted = (long) commentEntity.getProperty(TIME_POSTED_KEY);
+    this.posterId = (String) commentEntity.getProperty(POSTER_ID_KEY);
   }
 
   /**
@@ -109,6 +114,7 @@ public final class Comment {
     commentEntity.setProperty(AUTHOR_KEY, author);
     commentEntity.setProperty(BODY_KEY, commentBody);
     commentEntity.setProperty(TIME_POSTED_KEY, timePosted);
+    commentEntity.setProperty(POSTER_ID_KEY, posterId);
   }
 
   public String getAuthor() {
@@ -121,6 +127,10 @@ public final class Comment {
 
   public long getId() {
     return id;
+  }
+
+  public String getPosterId() {
+    return posterId;
   }
 
   public long getTimePosted() {
