@@ -34,8 +34,6 @@ public class AuthServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {    
-    response.setContentType("application/json;");
-
     JsonObject responseObject = new JsonObject();
 
     UserService userService = UserServiceFactory.getUserService();
@@ -54,8 +52,9 @@ public class AuthServlet extends HttpServlet {
     }
 
     String responseJson = gson.toJson(responseObject);
-
+    
     response.setStatus(HttpServletResponse.SC_OK);
+    response.setContentType("application/json;");
     response.getWriter().println(responseJson);
   }
 
