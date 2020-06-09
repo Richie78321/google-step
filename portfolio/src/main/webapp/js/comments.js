@@ -1,4 +1,15 @@
+/**
+ * @typedef {Object} AuthData
+ * @property {string} loginUrl The URL to log in.
+ * @property {boolean} authorized Whether the user is currently authorized.
+ * @property {{string: email, string: id}} [user] Information about the 
+ * current authorized user. Only present if the user is authorized.
+ */
+/**
+ * @type {AuthData}
+ */
 let commentAuthData = null;
+
 /**
  * Initializes the comment system.
  */
@@ -53,13 +64,6 @@ function applyAuthorizationToUI() {
   }
 }
 
-/**
- * @typedef {Object} AuthData
- * @property {string} loginUrl The URL to log in.
- * @property {boolean} authorized Whether the user is currently authorized.
- * @property {{string: email, string: id}} [user] Information about the 
- * current authorized user. Only present if the user is authorized.
- */
 /**
  * Gets the user's authorization status.
  * @return {Promise} Returns a promise that fetches the user's 
