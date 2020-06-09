@@ -159,7 +159,15 @@
 
       <h3>Comments</h3>
       <div id="comment-section" class="mt-4 mb-5">
-        <div class="card p-4 mb-2">
+        <div class="only-display-without-auth card p-4 mb-2">
+          <div class="row justify-content-center">
+            <h4>Please login to post a comment.</h4>
+          </div>
+          <div class="row justify-content-center">
+            <a id="comment-auth-login" class="text-center btn btn-success" href="#" role="button">Login</a>
+          </div>
+        </div>
+        <div class="only-display-with-auth card p-4 mb-2">
           <h4 class="text-center">Post your thoughts!</h4>
           <form id="comment-form" action="/comments" method="POST">
             <div class="form-group">
