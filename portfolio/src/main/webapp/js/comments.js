@@ -1,6 +1,7 @@
 /**
  * @typedef {Object} AuthData
  * @property {string} loginUrl The URL to log in.
+ * @property {string} logoutUrl The URL to log out.
  * @property {boolean} authorized Whether the user is currently authorized.
  * @property {{string: email, string: id}} [user] Information about the 
  * current authorized user. Only present if the user is authorized.
@@ -53,6 +54,12 @@ function applyAuthorizationToUI() {
         Array.from(document.getElementsByClassName("only-display-with-auth"));
     // Make authorization-only UI visible
     withAuthElements.forEach((elem) => elem.style.display = "inherit");
+
+    const logoutButton = document.getElementById("comment-auth-logout");
+    logoutButton.href = commentAuthData.logoutUrl;
+
+    const emailLoginStatus = document.getElementById("comment-auth-email");
+    emailLoginStatus.innerText = commentAuthData.user.email;
   } else {
     const withoutAuthElements = Array.from(
         document.getElementsByClassName("only-display-without-auth"));
@@ -123,6 +130,7 @@ function removeCommentsOnPage() {
  * @property {string} commentBody
  * @property {number} id
  * @property {number} timePosted Time the comment was posted in unix timestamp.
+ * @property {string} posterId
  */
 /**
  * Adds a comment to the comments section UI.
@@ -140,12 +148,16 @@ function addCommentToPage(comment) {
   const formattedTime = moment(comment.timePosted).fromNow();
   authorFooter.innerText = `${comment.author}, ${formattedTime}`;
 
-  const deleteButton = document.createElement("button");
-  deleteButton.classList.add("btn", "btn-muted", "btn-sm", "ml-2");
-  deleteButton.innerText = "Delete";
-  deleteButton.addEventListener("click", createCommentDeleter(comment.id));
+  if (commentAuthData && 
+      commentAuthData.authorized && 
+      commentAuthData.user.id === comment.posterId) {
+    const deleteButton = document.createElement("button");
+    deleteButton.classList.add("btn", "btn-muted", "btn-sm", "ml-2");
+    deleteButton.innerText = "Delete";
+    deleteButton.addEventListener("click", createCommentDeleter(comment.id));
 
-  authorFooter.appendChild(deleteButton);
+    authorFooter.appendChild(deleteButton);
+  }
 
   newComment.appendChild(authorFooter);
 
@@ -202,9 +214,9 @@ function createCommentDeleter(id) {
       addNotification("Comment deleted successfully.", "alert-success");
       loadComments();
     }).catch(err => {
-        console.log(err);
+      console.log(err);
 
-        addNotification(
+      addNotification(
           "Failed to delete the comment! Please try again later.", 
           "alert-danger");
     });
@@ -220,7 +232,7 @@ function createCommentDeleter(id) {
  * @return {Promise}
  */
 function formatFetchResponse(fetchRequest) {
-  return fetch.then((resp) => {
+  return fetchRequest.then((resp) => {
     if (resp.ok) {
       return resp.json();
     } else {

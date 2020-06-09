@@ -168,6 +168,14 @@
           </div>
         </div>
         <div class="only-display-with-auth card p-4 mb-2">
+          <div class="row justify-content-center">
+            <h4>Logged in as <span id="comment-auth-email" class="text-success">[email]</span>.</h4>
+          </div>
+          <div class="row justify-content-center">
+            <a id="comment-auth-logout" class="text-center btn btn-success" href="#" role="button">Log out</a>
+          </div>
+        </div>
+        <div class="only-display-with-auth card p-4 mb-2">
           <h4 class="text-center">Post your thoughts!</h4>
           <form id="comment-form" action="/comments" method="POST">
             <div class="form-group">
