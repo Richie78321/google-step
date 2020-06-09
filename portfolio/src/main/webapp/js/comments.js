@@ -70,14 +70,7 @@ function applyAuthorizationToUI() {
  * authorization data {@link AuthData}.
  */
 function getAuthorization() {
-  return fetch('/auth').then((resp) => {
-    if (resp.ok) {
-      return resp.json();
-    } else {
-      return resp.text().then(
-          text => Promise.reject(`Error ${resp.status}: ${text}`));
-    }
-  }).then((authData) => {
+  return formatFetchResponse(fetch('/auth')).then((authData) => {
     console.log("Got comment authorization:");
     console.log(authData);
     commentAuthData = authData;
@@ -97,14 +90,7 @@ function loadComments() {
   loadUrl.searchParams.set(
       "page", commentControl.elements["pageNum"].value)
 
-  fetch(loadUrl).then(resp => {
-    if (resp.ok) {
-      return resp.json();
-    } else {
-      return resp.text().then(
-          text => Promise.reject(`Error ${resp.status}: ${text}`));
-    }
-  }).then(comments => {
+  formatFetchResponse(fetch(loadUrl)).then(comments => {
     console.log("Received comments: ");
     console.log(comments);
 
@@ -189,14 +175,9 @@ function postComment(event) {
     body: formData
   };
 
-  fetch('/comments', requestOptions).then(resp => {
-    if (resp.ok) {
-      addNotification("Comment posted successfully!", "alert-success");
-      loadComments();
-    } else {
-      return resp.text().then(
-          text => Promise.reject(`Error ${resp.status}: ${text}`));
-    }
+  formatFetchResponse(fetch('/comments', requestOptions)).then(() => {
+    addNotification("Comment posted successfully!", "alert-success");
+    loadComments();
   }).catch(err => {
     console.error(err);
 
@@ -217,20 +198,34 @@ function createCommentDeleter(id) {
         new URL("/comments", `${location.protocol}//${location.hostname}`);
     deleteUrl.searchParams.set("id", id);
 
-    fetch(deleteUrl, { method: 'DELETE' }).then((resp) => {
-        if (resp.ok) {
-          addNotification("Comment deleted successfully.", "alert-success");
-          loadComments();
-        } else {
-          return resp.text().then(
-              text => Promise.reject(`Error ${resp.status}: ${text}`));
-        }
-      }).catch(err => {
+    formatFetchResponse(fetch(deleteUrl, { method: 'DELETE' })).then(() => {
+      addNotification("Comment deleted successfully.", "alert-success");
+      loadComments();
+    }).catch(err => {
         console.log(err);
 
         addNotification(
           "Failed to delete the comment! Please try again later.", 
           "alert-danger");
-      });
+    });
   };
+}
+
+/**
+ * Formats the fetch response according to the portfolio's API.
+ * 
+ * If the response is okay, the response format is JSON. Otherwise the error 
+ * message is formatted as raw text and the promise is rejected.
+ * @param {Promise} fetchRequest Fetch request to portfolio API.
+ * @return {Promise}
+ */
+function formatFetchResponse(fetchRequest) {
+  return fetch.then((resp) => {
+    if (resp.ok) {
+      return resp.json();
+    } else {
+      return resp.text().then(
+          text => Promise.reject(`Error ${resp.status}: ${text}`));
+    }
+  });
 }
