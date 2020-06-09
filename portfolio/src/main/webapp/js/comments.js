@@ -91,7 +91,9 @@ function addCommentToPage(comment) {
   const deleteButton = document.createElement("button");
   deleteButton.classList.add("btn", "btn-muted", "btn-sm", "ml-2");
   deleteButton.innerText = "Delete";
-  deleteButton.addEventListener("click", createCommentDeleter(comment.id));
+  deleteButton.addEventListener(
+      "click", 
+      createCommentDeleter(comment.id, newComment));
 
   authorFooter.appendChild(deleteButton);
 
@@ -143,28 +145,30 @@ function postComment(event) {
 /**
  * Creates a function that sends a comment delete request.
  * @param {number} id
+ * @param {Element} commentElement
  * @return Returns a function that deletes the comment associated with an ID.
  */
-function createCommentDeleter(id) {
+function createCommentDeleter(id, commentElement) {
   return () => {
     const deleteUrl = 
         new URL("/comments", `${location.protocol}//${location.hostname}`);
     deleteUrl.searchParams.set("id", id);
 
     fetch(deleteUrl, { method: 'DELETE' }).then((resp) => {
-        if (resp.ok) {
-          addNotification("Comment deleted successfully.", "alert-success");
-          loadComments();
-        } else {
-          return resp.text().then(
-              text => Promise.reject(`Error ${resp.status}: ${text}`));
-        }
-      }).catch(err => {
-        console.log(err);
+      if (resp.ok) {
+        addNotification("Comment deleted successfully.", "alert-success");
+        const commentContainer = document.getElementById("comment-container");
+        commentContainer.removeChild(commentElement);
+      } else {
+        return resp.text().then(
+            text => Promise.reject(`Error ${resp.status}: ${text}`));
+      }
+    }).catch(err => {
+      console.log(err);
 
-        addNotification(
+      addNotification(
           "Failed to delete the comment! Please try again later.", 
           "alert-danger");
-      });
+    });
   };
 }
