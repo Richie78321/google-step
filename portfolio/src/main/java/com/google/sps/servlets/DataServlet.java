@@ -132,6 +132,13 @@ public class DataServlet extends HttpServlet {
   @Override
   public void doDelete(HttpServletRequest request, HttpServletResponse response) 
       throws IOException {
+    UserService userService = UserServiceFactory.getUserService();
+    if (!userService.isUserLoggedIn()) {
+      sendRawTextError(
+          response, HttpServletResponse.SC_UNAUTHORIZED, "Must be logged in to delete a comment.");
+      return;
+    }
+    
     String idParameter = getParameter(request, ID_KEY, null);
     if (idParameter == null) {
       sendRawTextError(
@@ -160,6 +167,15 @@ public class DataServlet extends HttpServlet {
     }
 
     Comment commentToDelete = new Comment(entityToDelete);
+    User currentUser = userService.getCurrentUser();
+    if (!currentUser.getUserId().equals(commentToDelete.getPosterId())) {
+      sendRawTextError(
+          response, 
+          HttpServletResponse.SC_FORBIDDEN, 
+          "Cannot delete a comment from another user.");
+      return;
+    }
+
     datastore.delete(commentKey);
 
     String commentJson = gson.toJson(commentToDelete);
