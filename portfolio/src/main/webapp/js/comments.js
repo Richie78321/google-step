@@ -40,10 +40,12 @@ function applyAuthorizationToUI() {
   if (commentAuthData.authorized) {
     const withAuthElements = 
         Array.from(document.getElementsByClassName("only-display-with-auth"));
+    // Make authorization-only UI visible
     withAuthElements.forEach((elem) => elem.style.display = "inherit");
   } else {
     const withoutAuthElements = Array.from(
         document.getElementsByClassName("only-display-without-auth"));
+    // Make no-authorization-only UI visible
     withoutAuthElements.forEach((elem) => elem.style.display = "inherit");
     
     const loginButton = document.getElementById("comment-auth-login");
