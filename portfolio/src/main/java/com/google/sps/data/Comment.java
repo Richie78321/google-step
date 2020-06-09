@@ -38,7 +38,7 @@ public final class Comment {
    * @return Returns a new comment object or a validation error message.
    */
   public static ValidationResult<Comment> getIncomingComment(
-      HttpServletRequest request, User sender) {
+      HttpServletRequest request, String posterId) {
     String commentAuthor = DataServlet.getParameter(request, AUTHOR_KEY, "");
     String commentBody = DataServlet.getParameter(request, BODY_KEY, "");
 
@@ -49,7 +49,7 @@ public final class Comment {
     if (validationError != null) {
       return new ValidationResult<Comment>(validationError);
     } else {
-      Comment newComment = new Comment(commentAuthor, commentBody, sender.getUserId());
+      Comment newComment = new Comment(commentAuthor, commentBody, posterId);
       return new ValidationResult<Comment>(newComment);
     }
   }
