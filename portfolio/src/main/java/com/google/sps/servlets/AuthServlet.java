@@ -46,8 +46,7 @@ public class AuthServlet extends HttpServlet {
     if (userService.isUserLoggedIn()) {
       responseObject.addProperty("authorized", true);
 
-      User currentUser = userService.getCurrentUser();
-      UserData userData = new UserData(currentUser);
+      UserData userData = new UserData(userService.getCurrentUser());
 
       responseObject.add("user", gson.toJsonTree(userData));
     } else {
