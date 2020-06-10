@@ -20,6 +20,14 @@
   z-index: 10;
 }
 
+.only-display-with-auth {
+  display: none;
+}
+
+.only-display-without-auth {
+  display: none;
+}
+
 .project-card {
   transition: 0.1s;
 }
