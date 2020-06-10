@@ -154,7 +154,9 @@ function addCommentToPage(comment) {
     const deleteButton = document.createElement("button");
     deleteButton.classList.add("btn", "btn-muted", "btn-sm", "ml-2");
     deleteButton.innerText = "Delete";
-    deleteButton.addEventListener("click", createCommentDeleter(comment.id));
+    deleteButton.addEventListener(
+        "click", 
+        createCommentDeleter(comment.id, newComment));
 
     authorFooter.appendChild(deleteButton);
   }
@@ -202,9 +204,10 @@ function postComment(event) {
 /**
  * Creates a function that sends a comment delete request.
  * @param {number} id
+ * @param {Element} commentElement
  * @return Returns a function that deletes the comment associated with an ID.
  */
-function createCommentDeleter(id) {
+function createCommentDeleter(id, commentElement) {
   return () => {
     const deleteUrl = 
         new URL("/comments", `${location.protocol}//${location.hostname}`);
@@ -212,7 +215,8 @@ function createCommentDeleter(id) {
 
     formatFetchResponse(fetch(deleteUrl, { method: 'DELETE' })).then(() => {
       addNotification("Comment deleted successfully.", "alert-success");
-      loadComments();
+      const commentContainer = document.getElementById("comment-container");
+      commentContainer.removeChild(commentElement);
     }).catch(err => {
       console.log(err);
 
