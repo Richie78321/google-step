@@ -17,6 +17,7 @@ package com.google.sps;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -134,17 +135,9 @@ public final class FindMeetingQuery {
     Event event;
     while (eventsIterator.hasNext()) {
       event = eventsIterator.next();
-      Set<String> eventAttendees = event.getAttendees();
 
-      Iterator<String> attendeesIterator = attendees.iterator();
-      String attendee;
-      while (attendeesIterator.hasNext()) {
-        attendee = attendeesIterator.next();
-        
-        if (eventAttendees.contains(attendee)) {
-          attendingEvents.add(event);
-          break;
-        }
+      if (!Collections.disjoint(event.getAttendees(), attendees)) {
+        attendingEvents.add(event);
       }
     }
 
