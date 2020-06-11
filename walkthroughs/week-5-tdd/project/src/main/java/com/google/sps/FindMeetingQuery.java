@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.Set;
 
 public final class FindMeetingQuery {
   /**
@@ -33,114 +32,57 @@ public final class FindMeetingQuery {
       return Arrays.asList();
     }
 
-    events = getEventsAttending(events, request.getAttendees());
-    Collection<TimeRange> availableTimes = new ArrayList<TimeRange>();
-    availableTimes.add(TimeRange.WHOLE_DAY);
+    Collection<TimeRange> validTimeRanges = new ArrayList<TimeRange>();
 
-    // Each event time range punches a hole in available time range
-    Iterator<Event> eventIterator = events.iterator();
-    Event event;
-    while (eventIterator.hasNext()) {
-      event = eventIterator.next();
-      TimeRange eventTimeRange = event.getWhen();
+    Collection<TimeRange> orderedConflicts = 
+        getOrderedAttendingEvents(events, request.getAttendees());
+    Iterator<TimeRange> conflictsIterator = orderedConflicts.iterator();
+    int prevConflictEndTime = TimeRange.START_OF_DAY;
 
-      Collection<TimeRange> newRanges = new ArrayList<TimeRange>();
-      Collection<TimeRange> rangesToRemove = new ArrayList<TimeRange>();
-      Iterator<TimeRange> availableTimesIterator = availableTimes.iterator();
-      TimeRange availableTime;
-      while (availableTimesIterator.hasNext()) {
-        availableTime = availableTimesIterator.next();
-
-        if (availableTime.overlaps(eventTimeRange)) {
-          removeRange(
-              newRanges, rangesToRemove, availableTime, eventTimeRange, request.getDuration());
-        }
+    while (conflictsIterator.hasNext()) {
+      TimeRange conflict = conflictsIterator.next();
+      int conflictStartTime = conflict.start();
+      
+      // Check for gap between prev conflict and this conflict.
+      if (conflictStartTime > prevConflictEndTime && 
+          conflictStartTime - prevConflictEndTime >= request.getDuration()) {
+        validTimeRanges.add(TimeRange.fromStartEnd(prevConflictEndTime, conflictStartTime, false));
       }
 
-      availableTimes.removeAll(rangesToRemove);
-      availableTimes.addAll(newRanges);
-    }
-
-    return availableTimes;
-  }
-
-  /**
-   * Removes a range of time from a time range.
-   * Precondition: The ranges are assumed to be overlapping.
-   *
-   * Broken down into three different scenarios:
-   * 1. The time range is fully contained in the range to remove: just remove the time range.
-   * 2. The range to remove is fully contained in the time range: split the time range into two
-   * pieces.
-   * 3. The time range overlaps with the range to remove but neither is fully contained in the
-   * other: trim the time range.
-   * 
-   * @param newRanges
-   * @param discardedRanges
-   * @param timeRange
-   * @param rangeToRemove
-   * @param minDuration
-   */
-  private void removeRange(
-      Collection<TimeRange> newRanges,
-      Collection<TimeRange> discardedRanges,
-      TimeRange timeRange, 
-      TimeRange rangeToRemove, 
-      long minDuration) {
-    discardedRanges.add(timeRange);
-    if (rangeToRemove.contains(timeRange)) {
-      return;
-    }
-    
-    if (timeRange.contains(rangeToRemove)) {
-      // Split time
-      addTimeRangeIfLongEnough(newRanges, timeRange.start(), rangeToRemove.start(), minDuration);
-      addTimeRangeIfLongEnough(newRanges, rangeToRemove.end(), timeRange.end(), minDuration);
-    }
-    else {
-      if (timeRange.start() < rangeToRemove.start()) {
-        addTimeRangeIfLongEnough(
-            newRanges, timeRange.start(), rangeToRemove.start(), minDuration);
-      } else {
-        addTimeRangeIfLongEnough(newRanges, rangeToRemove.end(), timeRange.end(), minDuration);
+      // Only update conflict end time if it is greater than the existing previous end time.
+      // This is to handle nested events where previous event will have later end time.
+      if (conflict.end() > prevConflictEndTime) {
+        prevConflictEndTime = conflict.end();  
       }
     }
-  }
 
-  /**
-   * Adds a time range to the collection if it meets the specified minimum duration
-   * @param newRanges
-   * @param startTime
-   * @param endTime
-   * @param minDuration
-   */
-  private void addTimeRangeIfLongEnough(
-      Collection<TimeRange> newRanges, int startTime, int endTime, long minDuration) {
-    if (endTime - startTime >= minDuration) {
-      newRanges.add(TimeRange.fromStartEnd(startTime, endTime, false));
+    if (TimeRange.END_OF_DAY - prevConflictEndTime >= request.getDuration()) {
+      validTimeRanges.add(TimeRange.fromStartEnd(prevConflictEndTime, TimeRange.END_OF_DAY, true));  
     }
+
+    return validTimeRanges;
   }
 
   /**
-   * Gets all of the events being attended by at least one of the attendees.
+   * Get a collection of the events at least one of the attendees is attending, ordered by
+   * ascending start time.
    * @param events
    * @param attendees
-   * @return Returns a collection of events being attended by at least one of the attendees.
+   * @return Return a collection of the events in ascending order of start time.
    */
-  private Collection<Event> getEventsAttending(
+  private Collection<TimeRange> getOrderedAttendingEvents(
       Collection<Event> events, Collection<String> attendees) {
-    Collection<Event> attendingEvents = new ArrayList<Event>();
+    ArrayList<TimeRange> timeConflicts = new ArrayList<TimeRange>();
 
     Iterator<Event> eventsIterator = events.iterator();
-    Event event;
     while (eventsIterator.hasNext()) {
-      event = eventsIterator.next();
-
+      Event event = eventsIterator.next();
       if (!Collections.disjoint(event.getAttendees(), attendees)) {
-        attendingEvents.add(event);
+        timeConflicts.add(event.getWhen());
       }
     }
 
-    return attendingEvents;
+    Collections.sort(timeConflicts, TimeRange.ORDER_BY_START);
+    return timeConflicts;
   }
 }
