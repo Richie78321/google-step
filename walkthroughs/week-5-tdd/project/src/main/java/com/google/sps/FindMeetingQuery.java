@@ -44,8 +44,7 @@ public final class FindMeetingQuery {
       int conflictStartTime = conflict.start();
       
       // Check for gap between prev conflict and this conflict.
-      if (conflictStartTime > prevConflictEndTime && 
-          conflictStartTime - prevConflictEndTime >= request.getDuration()) {
+      if (conflictStartTime - prevConflictEndTime >= request.getDuration()) {
         validTimeRanges.add(TimeRange.fromStartEnd(prevConflictEndTime, conflictStartTime, false));
       }
 
