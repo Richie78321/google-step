@@ -45,7 +45,6 @@ public final class FindMeetingQuery {
     Collection<TimeRange> rangesAvailableAllAttendees =
         getRangesWithoutConflict(events, allAttendees, request.getDuration());
     
-    // First check for time ranges available with all attendees.
     if (!rangesAvailableAllAttendees.isEmpty() || 
         attendees.isEmpty() || 
         optionalAttendees.isEmpty()) {
