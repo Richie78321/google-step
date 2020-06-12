@@ -32,8 +32,7 @@ public final class FindMeetingQuery {
    * @param request
    * @return Returns the collection of time ranges when the event can be held.
    */
-  public Collection<TimeRange> query(
-      Collection<Event> events, MeetingRequest request) {
+  public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
     if (request.getDuration() > TimeRange.WHOLE_DAY.duration()) {
       return Arrays.asList();
     }
