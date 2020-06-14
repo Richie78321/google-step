@@ -301,7 +301,7 @@ public final class FindMeetingQueryTest {
 
   @Test
   public void optionalAttendeeIsConsidered() {
-    // Include an optional attendee, and that optional attendee is considered
+    // Include an optional attendee, and that optional attendee is included
     // because there exist time ranges including the optional attendee.
 
     Collection<Event> events = Arrays.asList(
@@ -348,10 +348,9 @@ public final class FindMeetingQueryTest {
   }
 
   @Test
-  public void onlyOptionalAttendeesWithTime() {
+  public void allOptionalAttendees() {
     // Only optional attendees are included in the request. 
-    // There are sufficient gaps in their conflicts that allow for
-    // meeting time ranges to be returned.
+    // There exist available meeting times such that they all should be able to attend.
 
     Collection<Event> events = Arrays.asList(
         new Event("Event 1", TimeRange.fromStartEnd(TIME_0800AM, TIME_0930AM, false),
@@ -397,8 +396,9 @@ public final class FindMeetingQueryTest {
 
   @Test
   public void optionalOptimization() {
-    // Two optional attendees are included in the request, where one optional attendee should be
-    // considered. The other optional attendee has an all-day event and should not be considered.
+    // Two optional attendees are included in the request.
+    // Optional attendee A should be considered, while optional attendee B should not because of
+    // an all-day conflict.
 
     Collection<Event> events = Arrays.asList(
         new Event("Event 1", TimeRange.fromStartEnd(TimeRange.START_OF_DAY, TIME_0830AM, false),
@@ -420,17 +420,17 @@ public final class FindMeetingQueryTest {
 
   @Test
   public void optionalOptimizationForQuantity() {
-    // Three optional attendees are present. Although only considering one optional attendee
-    // would result in more available time ranges, two optional attendees can be considered in
-    // another optimization. The selection with the most optional attendees should be 
-    // preferred.
+    // Three optional attendees are present, where only B or both C and D can be chosen while still
+    // having available meeting time options. The optional attendee optimization should choose 
+    // optional attendees C and D, optimizing for the number of optional 
+    // attendees over the available meeting time options.
 
-    // Required:   |---|  |-|   |--|
-    // Optional 1:     |--|
-    // Optional 2:          |---|
-    // Optional 3:       |------|
-    //
-    // Correct:    |---| |---------| (Optional 2 and 3)
+    // Events  : |--A--|  |-A-|     |----A----|
+    //                 |B-|
+    //                        |--C--|
+    //                        |--D--|
+    // Day     : |----------------------------|
+    // Options :       |--|                      (Choose optional attendees C and D)  
 
     Collection<Event> events = Arrays.asList(
         new Event("Event 1", TimeRange.fromStartEnd(TimeRange.START_OF_DAY, TIME_0800AM, false),
@@ -441,10 +441,8 @@ public final class FindMeetingQueryTest {
             Arrays.asList(PERSON_A)),
         new Event("Event 4", TimeRange.fromStartEnd(TIME_0800AM, TIME_0900AM, false),
             Arrays.asList(PERSON_B)),
-        new Event("Event 3", TimeRange.fromStartEnd(TIME_0830AM, TIME_1100AM, false),
-            Arrays.asList(PERSON_C)),
         new Event("Event 3", TimeRange.fromStartEnd(TIME_0930AM, TIME_1100AM, false),
-            Arrays.asList(PERSON_D)));
+            Arrays.asList(PERSON_C, PERSON_D)));
 
     MeetingRequest request = new MeetingRequest(Arrays.asList(PERSON_A), DURATION_30_MINUTES);
     request.addOptionalAttendee(PERSON_B);
@@ -453,21 +451,21 @@ public final class FindMeetingQueryTest {
 
     Collection<TimeRange> actual = query.query(events, request);
     Collection<TimeRange> expected =
-        Arrays.asList(TimeRange.fromStartEnd(TIME_0800AM, TIME_0830AM, false));
+        Arrays.asList(TimeRange.fromStartEnd(TIME_0800AM, TIME_0900AM, false));
 
     Assert.assertEquals(expected, actual);
   }
 
   @Test
   public void optionalOptimizationForDuration() {
-    // Two optional attendees are present, where both can be considered individually but not
-    // together. The optional attendee that provides the most available time should be included.
+    // Two optional attendees are present but only one can attend the meeting
+    // (otherwise there are no times to meet). So, optional attendee optimization should optimize
+    // for the attendee that brings the most options for the meeting times.
 
-    // Total Space: |---------|
-    // Optional 1:  |---|
-    // Optional 2:      |-----|
-    //
-    // Correct:     |---| (Optional 1)
+    // Events  : |-B-|
+    //               |---C---|
+    // Day     : |-----------|
+    // Options :     |-------| (Choose optional attendee B)
 
     Collection<Event> events = Arrays.asList(
         new Event("Event 1", TimeRange.fromStartEnd(TimeRange.START_OF_DAY, TIME_0930AM, false),
