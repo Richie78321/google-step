@@ -49,7 +49,7 @@ public final class FindMeetingQuery {
       return rangesAvailableRequired;
     }
 
-    Collection<TimeRange> rangesAvailableOptional = findOptimalOptionalAttendee(events, request);
+    Collection<TimeRange> rangesAvailableOptional = optionalAttendeeOptimalRange(events, request);
     
     if (rangesAvailableOptional.isEmpty()) {
       return rangesAvailableRequired;
@@ -117,7 +117,7 @@ public final class FindMeetingQuery {
    * @param request
    * @return Returns the optimal time ranges for optional attendees. Can be empty.
    */
-  private Collection<TimeRange> findOptimalOptionalAttendee(
+  private Collection<TimeRange> optionalAttendeeOptimalRange(
       Collection<Event> events, MeetingRequest request) {
     // This works by checking each combination of optional attendees in increasing quantity.
     // Starting with groups of one attendee, then two, etc. Until less than two combinations
@@ -132,9 +132,7 @@ public final class FindMeetingQuery {
         new ArrayList<String>(request.getOptionalAttendees());
     Collection<String> attendees = request.getAttendees();
 
-    int successfulCombinations = 0;
     Collection<TimeRange> bestTimeRange = Arrays.asList();
-    int longestDuration = 0;
     for (int i = 1; i <= optionalAttendees.size(); i++) {
       Iterator<int[]> attendeeCombinations = 
           CombinatoricsUtils.combinationsIterator(optionalAttendees.size(), i);
@@ -142,6 +140,8 @@ public final class FindMeetingQuery {
       // Find the longest duration of time ranges for each combination of i attendees.
       while (attendeeCombinations.hasNext()) {
         int[] combination = attendeeCombinations.next();
+        int successfulCombinations = 0;
+        int longestDuration = 0;
 
         Stream<String> optionalAttendeeCombination = 
             Arrays.stream(combination).mapToObj(index -> optionalAttendees.get(index));
@@ -163,12 +163,11 @@ public final class FindMeetingQuery {
         }
       }
 
-      // This is an optimization following the logic that if only one combination of n elements
+      // Following the logic that if only one combination of n elements
       // was successful, there can be no combination of (n + 1) elements that is also successful.
       if (successfulCombinations < 2) {
         break;
       }
-      longestDuration = 0;
     }
 
     return bestTimeRange;
