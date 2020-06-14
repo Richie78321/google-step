@@ -136,12 +136,12 @@ public final class FindMeetingQuery {
     for (int i = 1; i <= optionalAttendees.size(); i++) {
       Iterator<int[]> attendeeCombinations = 
           CombinatoricsUtils.combinationsIterator(optionalAttendees.size(), i);
-      
+      int successfulCombinations = 0;
+      int longestDuration = 0;
+
       // Find the longest duration of time ranges for each combination of i attendees.
       while (attendeeCombinations.hasNext()) {
         int[] combination = attendeeCombinations.next();
-        int successfulCombinations = 0;
-        int longestDuration = 0;
 
         Stream<String> optionalAttendeeCombination = 
             Arrays.stream(combination).mapToObj(index -> optionalAttendees.get(index));
