@@ -38,9 +38,9 @@ public final class FindMeetingQuery {
       return Arrays.asList();
     }
 
-    Collection<String> attendees = request.getAttendees();
+    Collection<String> requiredAttendees = request.getAttendees();
     Collection<TimeRange> rangesAvailableRequired =
-        getRangesWithoutConflict(events, attendees, request.getDuration());
+        getRangesWithoutConflict(events, requiredAttendees, request.getDuration());
     
     if (rangesAvailableRequired.isEmpty() || 
         request.getOptionalAttendees().isEmpty()) {
