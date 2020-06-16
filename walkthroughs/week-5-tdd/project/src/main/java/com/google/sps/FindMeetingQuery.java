@@ -14,6 +14,7 @@
 
 package com.google.sps;
 
+import org.apache.commons.math3.util.CombinatoricsUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,24 +38,24 @@ public final class FindMeetingQuery {
       return Arrays.asList();
     }
 
-    Collection<String> attendees = request.getAttendees();
-    Collection<String> optionalAttendees = request.getOptionalAttendees();
-    Collection<String> allAttendees = 
-        Stream.concat(attendees.stream(), optionalAttendees.stream()).collect(Collectors.toList());
+    Collection<String> requiredAttendees = request.getAttendees();
+    Collection<TimeRange> rangesAvailableRequired =
+        getRangesWithoutConflict(events, requiredAttendees, request.getDuration());
     
-    Collection<TimeRange> rangesAvailableAllAttendees =
-        getRangesWithoutConflict(events, allAttendees, request.getDuration());
-    
-    if (!rangesAvailableAllAttendees.isEmpty() || 
-        attendees.isEmpty() || 
-        optionalAttendees.isEmpty()) {
-      // If required attendees is empty: treat optional attendees as required.
-      // If optional attendees is empty: no need to check for times without optional attendees.
-      return rangesAvailableAllAttendees;
+    if (rangesAvailableRequired.isEmpty() || 
+        request.getOptionalAttendees().isEmpty()) {
+      // If the available time ranges for required attendees is empty: no need to check optional.
+      // If there are no optional attendees: no need to check optional. 
+      return rangesAvailableRequired;
     }
 
-
-    return getRangesWithoutConflict(events, attendees, request.getDuration());
+    Collection<TimeRange> rangesAvailableOptional = optionalAttendeeOptimalRange(events, request);
+    
+    if (rangesAvailableOptional.isEmpty()) {
+      return rangesAvailableRequired;
+    } else {
+      return rangesAvailableOptional;
+    }
   }
 
   private Collection<TimeRange> getRangesWithoutConflict(
@@ -107,5 +108,83 @@ public final class FindMeetingQuery {
 
     Collections.sort(timeConflicts, TimeRange.ORDER_BY_START);
     return timeConflicts;
+  }
+
+  /**
+   * Find the optimal time ranges for optional attendees.
+   *
+   * @param events
+   * @param request
+   * @return Returns the optimal time ranges for optional attendees. Can be empty.
+   */
+  private Collection<TimeRange> optionalAttendeeOptimalRange(
+      Collection<Event> events, MeetingRequest request) {
+    // This works by checking each combination of optional attendees in increasing quantity.
+    // Starting with groups of one attendee, then two, etc. Until less than two combinations
+    // had non-empty ranges (see optimization notes below) or all combinations have been checked.
+    // 
+    // For large numbers of optional attendees, this can quickly become inefficient.
+    // There is room here for a dynamic programming approach following the logic that a combination
+    // of three elements could be more efficiently computed by using a previously-computed
+    // combination of two elements. 
+
+    ArrayList<String> optionalAttendees = 
+        new ArrayList<String>(request.getOptionalAttendees());
+    Collection<String> attendees = request.getAttendees();
+
+    Collection<TimeRange> bestTimeRange = Arrays.asList();
+    for (int i = 1; i <= optionalAttendees.size(); i++) {
+      Iterator<int[]> attendeeCombinations = 
+          CombinatoricsUtils.combinationsIterator(optionalAttendees.size(), i);
+      int successfulCombinations = 0;
+      int longestDuration = 0;
+
+      // Find the longest duration of time ranges for each combination of i attendees.
+      while (attendeeCombinations.hasNext()) {
+        int[] combination = attendeeCombinations.next();
+
+        Stream<String> optionalAttendeeCombination = 
+            Arrays.stream(combination).mapToObj(index -> optionalAttendees.get(index));
+        Collection<String> attendeeCombination = 
+            Stream.concat(optionalAttendeeCombination, attendees.stream())
+                .collect(Collectors.toList());
+
+        Collection<TimeRange> availableRanges = 
+            getRangesWithoutConflict(events, attendeeCombination, request.getDuration());
+
+        if (!availableRanges.isEmpty()) {
+          successfulCombinations++;
+
+          int totalTime = getTotalDurationOfRanges(availableRanges);
+          if (totalTime > longestDuration) {
+            bestTimeRange = availableRanges;
+            longestDuration = totalTime;
+          }
+        }
+      }
+
+      // Following the logic that if only one combination of n elements
+      // was successful, there can be no combination of (n + 1) elements that is also successful.
+      if (successfulCombinations < 2) {
+        break;
+      }
+    }
+
+    return bestTimeRange;
+  }
+
+  /**
+   * Gets the total duration of a collection of non-overlapping time ranges.
+   * Precondition: The time ranges are not overlapping.
+   * @param timeRanges
+   * @return Returns the total duration of the time ranges.
+   */
+  private int getTotalDurationOfRanges(Collection<TimeRange> timeRanges) {
+    int totalTime = 0;
+    for (TimeRange timeRange : timeRanges) {
+      totalTime += timeRange.duration();
+    }
+
+    return totalTime;
   }
 }
