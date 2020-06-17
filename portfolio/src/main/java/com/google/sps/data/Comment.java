@@ -42,8 +42,8 @@ public final class Comment {
     String commentAuthor = DataServlet.getParameter(request, AUTHOR_KEY, "");
     String commentBody = DataServlet.getParameter(request, BODY_KEY, "");
 
-    commentAuthor = commentAuthor.replaceAll(UNSAFE_CHARACTERS_REGEX, "");
-    commentBody = commentBody.replaceAll(UNSAFE_CHARACTERS_REGEX, "");
+    commentAuthor = commentAuthor.replaceAll(UNSAFE_CHARACTERS_REGEX, "").trim();
+    commentBody = commentBody.replaceAll(UNSAFE_CHARACTERS_REGEX, "").trim();
 
     String validationError = validateIncomingComment(commentAuthor, commentBody);
     if (validationError != null) {
@@ -60,11 +60,11 @@ public final class Comment {
    */
   private static String validateIncomingComment(String commentAuthor, String commentBody) {
     List<String> validationErrors = new ArrayList<String>();
-
-    if (commentAuthor.isBlank()) {
+    
+    if (commentAuthor.length() == 0) {
       validationErrors.add("Please include a comment author (cannot be whitespace).");
     }
-    if (commentBody.isBlank()) {
+    if (commentBody.length() == 0) {
       validationErrors.add("Please include a comment body (cannot be whitespace).");
     }
 
