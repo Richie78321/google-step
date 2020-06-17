@@ -209,7 +209,7 @@ function postComment(event) {
 
   const requestOptions = {
     method: 'POST',
-    body: new FormData(commentForm)
+    body: new FormData(commentForm),
   };
 
   commentPostButton.disabled = true;
