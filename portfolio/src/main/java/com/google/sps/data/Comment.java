@@ -61,7 +61,6 @@ public final class Comment {
   private static String validateIncomingComment(String commentAuthor, String commentBody) {
     List<String> validationErrors = new ArrayList<String>();
     
-    // Used in place of string.isBlank(), which is only available in Java 11
     if (commentAuthor.length() == 0) {
       validationErrors.add("Please include a comment author (cannot be whitespace).");
     }
