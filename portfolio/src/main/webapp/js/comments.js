@@ -85,6 +85,20 @@ function getAuthorization() {
 }
 
 /**
+ * @typedef {Object} CommentBlobstoreData
+ * @property {string} uploadUrl The URL to post comments to.
+ * @property {string} redirectUrl The redirection URL after the blobstore.
+ */
+/**
+ * Gets the blobstore upload URL data for comment posting.
+ * @return {Promise} Returns a promise that receives the blobstore URL data.
+ * {@link CommentBlobstoreData}
+ */
+function getCommentUploadUrlData() {
+  return formatFetchResponse(fetch('/comment-blobstore'));
+}
+
+/**
  * Gets comments from the '/comments' endpoint
  * and displays them in the comments section.
  */
@@ -175,22 +189,36 @@ function postComment(event) {
   event.preventDefault();
 
   const commentForm = document.getElementById("comment-form");
+  const commentPostButton = commentForm.elements["submit-button"];
 
   // Form data is encoded strictly in the form multipart/form-data
-  // However, Java servlet only supports application/x-www-form-urlencoded
-  // So use URLSearchParams to convert the data to the supported format
-  const formData = new URLSearchParams(new FormData(commentForm)).toString();
+  // which is the only supported format for submission to blobstore.
+  // If blobstore is no longer used, should instead convert to 
+  // application/x-www-form-urlencoded, which is the only supported format 
+  // when sending directly to a Java servlet. 
+
+  // Sending with application/x-www-form-urlencoded can be done like this:
+  // const formData = new URLSearchParams(new FormData(commentForm)).toString();
+  // const requestOptions = {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/x-www-form-urlencoded'
+  //   },
+  //   body: formData
+  // };
 
   const requestOptions = {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: formData
+    body: new FormData(commentForm)
   };
 
-  formatFetchResponse(fetch('/comments', requestOptions)).then(() => {
+  commentPostButton.disabled = true;
+
+  getCommentUploadUrlData().then((uploadData) => {
+    return formatFetchResponse(fetch(uploadData.uploadUrl, requestOptions));
+  }).then(() => {
     addNotification("Comment posted successfully!", "alert-success");
+    commentForm.reset();
     loadComments();
   }).catch(err => {
     console.error(err);
@@ -198,6 +226,8 @@ function postComment(event) {
     addNotification(
         "Failed to post your comment! Please try again later.", 
         "alert-danger");
+  }).then(() => {
+    commentPostButton.disabled = false;
   });
 }
 
@@ -205,7 +235,8 @@ function postComment(event) {
  * Creates a function that sends a comment delete request.
  * @param {number} id
  * @param {Element} commentElement
- * @return Returns a function that deletes the comment associated with an ID.
+ * @return {function(): undefined}
+ * Returns a function that deletes the comment associated with an ID.
  */
 function createCommentDeleter(id, commentElement) {
   return () => {

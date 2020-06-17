@@ -60,11 +60,12 @@ public final class Comment {
    */
   private static String validateIncomingComment(String commentAuthor, String commentBody) {
     List<String> validationErrors = new ArrayList<String>();
-
-    if (commentAuthor.isBlank()) {
+    
+    // Used in place of string.isBlank(), which is only available in Java 11
+    if (commentAuthor.length() == 0 || commentAuthor.chars().allMatch(Character::isWhitespace)) {
       validationErrors.add("Please include a comment author (cannot be whitespace).");
     }
-    if (commentBody.isBlank()) {
+    if (commentBody.length() == 0 || commentBody.chars().allMatch(Character::isWhitespace)) {
       validationErrors.add("Please include a comment body (cannot be whitespace).");
     }
 

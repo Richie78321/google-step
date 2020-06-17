@@ -186,7 +186,11 @@
               <label for="comment-body">Comment</label>
               <textarea class="form-control comment-input" name="comment-body" maxlength="120" required></textarea>
             </div>
-            <button class="btn btn-primary" type="submit">Post</button>
+            <div class="form-group">
+              <label for="comment-body">Add Image (optional)</label>
+              <input type="file" class="form-control-file" name="commentPicture" accept=".gif,.jpg,.png"></input>
+            </div>
+            <button class="btn btn-primary" type="submit" name="submit-button">Post</button>
           </form>
         </div>
         <div class="card p-4 mb-4">
