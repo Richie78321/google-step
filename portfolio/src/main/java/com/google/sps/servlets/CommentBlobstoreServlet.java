@@ -26,9 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @WebServlet("/comment-blobstore")
 public class CommentBlobstoreServlet extends HttpServlet {
-
-  // Use constant redirect instead of client-supplied redirect URL 
-  // to avoid blobstore redirect spoofing.
+  
   public static String BLOBSTORE_URL_REDIRECT = "/comments";
 
   private Gson gson = new Gson();
