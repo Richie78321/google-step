@@ -14,6 +14,7 @@
 
 package com.google.sps.data;
 
+import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.datastore.Entity;
 import com.google.sps.helper.ValidationResult;
 import com.google.sps.servlets.CommentBlobstoreServlet;
@@ -33,6 +34,7 @@ public final class Comment {
   public static final String TIME_POSTED_KEY = "timePosted";
   public static final String POSTER_ID_KEY = "posterId";
   public static final String ATTACHED_IMAGE_URL_KEY = "attachedImageUrl";
+  public static final String ATTACHED_IMAGE_BLOBKEY_KEY = "attachedImageBlobKey";
   
   /**
    * Get and validate a comment object from an incoming request.
@@ -51,10 +53,22 @@ public final class Comment {
     if (validationError != null) {
       return new ValidationResult<Comment>(validationError);
     } else {
-      String attachedImageUrl = 
-          CommentBlobstoreServlet.getUploadedImageURL(request, "attachedImage");
+      Comment newComment;
 
-      Comment newComment = new Comment(commentAuthor, commentBody, posterId, attachedImageUrl);
+      BlobKey attachedImageBlobKey = 
+          CommentBlobstoreServlet.getUploadedImageBlobKey(request, "attachedImage");
+      if (attachedImageBlobKey != null) {
+        String attachedImageUrl = CommentBlobstoreServlet.getUploadedImageURL(attachedImageBlobKey);
+        newComment = new Comment(
+            commentAuthor, 
+            commentBody, 
+            posterId, 
+            attachedImageUrl, 
+            attachedImageBlobKey.getKeyString());
+      } else {
+        newComment = new Comment(commentAuthor, commentBody, posterId, null, null);
+      }
+
       return new ValidationResult<Comment>(newComment);
     }
   }
@@ -87,6 +101,8 @@ public final class Comment {
   private final long timePosted;
   private final String posterId;
   private final String attachedImageUrl;
+  // Transient to not be JSON serialized. 
+  private final transient String attachedImageBlobKey;
 
   /**
     * Creates a new comment object.
@@ -94,14 +110,21 @@ public final class Comment {
     * @param commentBody The text body of the comment.
     * @param posterId The ID of the user that posted the comment.
     * @param attachedImageUrl The URL to the image attached with the comment or null if no image.
+    * @param attachedImageBlobKey The blob key of the attached image. This is not serialized.
     */
-  public Comment(String author, String commentBody, String posterId, String attachedImageUrl) {
+  public Comment(
+      String author, 
+      String commentBody, 
+      String posterId, 
+      String attachedImageUrl, 
+      String attachedImageBlobKey) {
     this.author = author;
     this.commentBody = commentBody;
     this.id = -1;
     this.timePosted = System.currentTimeMillis();
     this.posterId = posterId;
     this.attachedImageUrl = attachedImageUrl;
+    this.attachedImageBlobKey = attachedImageBlobKey;
   }
   
   /**
@@ -115,6 +138,7 @@ public final class Comment {
     this.timePosted = (long) commentEntity.getProperty(TIME_POSTED_KEY);
     this.posterId = (String) commentEntity.getProperty(POSTER_ID_KEY);
     this.attachedImageUrl = (String) commentEntity.getProperty(ATTACHED_IMAGE_URL_KEY);
+    this.attachedImageBlobKey = (String) commentEntity.getProperty(ATTACHED_IMAGE_BLOBKEY_KEY);
   }
 
   /**
@@ -127,6 +151,7 @@ public final class Comment {
     commentEntity.setProperty(TIME_POSTED_KEY, timePosted);
     commentEntity.setProperty(POSTER_ID_KEY, posterId);
     commentEntity.setProperty(ATTACHED_IMAGE_URL_KEY, attachedImageUrl);
+    commentEntity.setProperty(ATTACHED_IMAGE_BLOBKEY_KEY, attachedImageBlobKey);
   }
 
   public String getAuthor() {
@@ -151,6 +176,10 @@ public final class Comment {
 
   public String getAttachedImageUrl() {
     return attachedImageUrl;
+  }
+
+  public String getAttachedImageBlobKey() {
+    return attachedImageBlobKey;
   }
 
   public void setId(long id) {

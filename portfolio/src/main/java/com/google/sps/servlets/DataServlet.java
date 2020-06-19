@@ -14,6 +14,7 @@
 
 package com.google.sps.servlets;
 
+import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -176,6 +177,10 @@ public class DataServlet extends HttpServlet {
       return;
     }
 
+    if (commentToDelete.getAttachedImageBlobKey() != null) {
+      CommentBlobstoreServlet.removeUploadedImage(
+          new BlobKey(commentToDelete.getAttachedImageBlobKey()));
+    }
     datastore.delete(commentKey);
 
     String commentJson = gson.toJson(commentToDelete);

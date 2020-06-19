@@ -48,12 +48,39 @@ public class CommentBlobstoreServlet extends HttpServlet {
    * was uploaded or the file uploaded was not an image. If the file is not an image, the blobstore
    * entry is removed to save space.
    * 
-   * Sourced from examples/hello-world in the blobstore tutorial.
    * @param request
-   * @param formInputName
    * @return Returns a URL that points to the image uploaded or null.
    */
-  public static String getUploadedImageURL(HttpServletRequest request, String formInputName) {
+  public static String getUploadedImageURL(BlobKey blobKey) {
+    ImagesService imagesService = ImagesServiceFactory.getImagesService();
+    ServingUrlOptions options = ServingUrlOptions.Builder.withBlobKey(blobKey);
+
+    // To support running in Google Cloud Shell with AppEngine's dev server, we must use the 
+    // relative path to the image, rather than the path returned by imagesService 
+    // which contains a host.
+    try {
+      URL url = new URL(imagesService.getServingUrl(options));
+      return url.getPath();
+    } catch (MalformedURLException e) {
+      return imagesService.getServingUrl(options);
+    }
+  }
+
+  public static boolean removeUploadedImage(BlobKey blobKey) {
+    ImagesService imagesService = ImagesServiceFactory.getImagesService();
+    try {
+      imagesService.deleteServingUrl(blobKey);
+    } catch (IllegalArgumentException e) {
+      return false;
+    }
+
+    BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
+    blobstoreService.delete(blobKey);
+
+    return true;
+  }
+
+  public static BlobKey getUploadedImageBlobKey(HttpServletRequest request, String formInputName) {
     BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
     Map<String, List<BlobKey>> blobs = blobstoreService.getUploads(request);
     List<BlobKey> blobKeys = blobs.get(formInputName);
@@ -75,19 +102,7 @@ public class CommentBlobstoreServlet extends HttpServlet {
       return null;
     }
 
-    // Use ImagesService to get a URL that points to the uploaded file.
-    ImagesService imagesService = ImagesServiceFactory.getImagesService();
-    ServingUrlOptions options = ServingUrlOptions.Builder.withBlobKey(blobKey);
-
-    // To support running in Google Cloud Shell with AppEngine's dev server, we must use the 
-    // relative path to the image, rather than the path returned by imagesService 
-    // which contains a host.
-    try {
-      URL url = new URL(imagesService.getServingUrl(options));
-      return url.getPath();
-    } catch (MalformedURLException e) {
-      return imagesService.getServingUrl(options);
-    }
+    return blobKey;
   }
 
   @Override
