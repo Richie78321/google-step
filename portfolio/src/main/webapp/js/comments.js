@@ -145,6 +145,7 @@ function removeCommentsOnPage() {
  * @property {number} id
  * @property {number} timePosted Time the comment was posted in unix timestamp.
  * @property {string} posterId
+ * @property {string} attachedImageUrl
  */
 /**
  * Adds a comment to the comments section UI.
@@ -153,8 +154,51 @@ function removeCommentsOnPage() {
 function addCommentToPage(comment) {
   const commentContainer = document.getElementById("comment-container");
   
+  const commentRow = document.createElement("div");
+  commentRow.classList.add("row", "align-items-end", "border-bottom");
+  
+  const commentBodyElement = getCommentBodyElement(comment, commentRow);
+  if (comment.attachedImageUrl) {
+    const commentAttachedImage = getCommentAttachedImage(comment);
+    commentAttachedImage.classList.add("col-sm-3");
+
+    commentBodyElement.classList.add("col-sm-9");
+
+    commentRow.appendChild(commentAttachedImage);
+  }
+  
+  commentRow.appendChild(commentBodyElement);
+  commentContainer.appendChild(commentRow);
+}
+
+/**
+ * Creates the attached image element for a comment.
+ * @param {Comment} comment
+ * @return {Element} Returns the image element.
+ */
+function createCommentAttachedImage(comment) {
+  const attachedImage = document.createElement("img");
+  attachedImage.src = comment.attachedImageUrl;
+  attachedImage.classList.add("img-thumbnail", "comment-image", "my-2");
+
+  const imageContainer = document.createElement("div");
+  imageContainer.classList.add("d-flex", "justify-content-center");
+  imageContainer.appendChild(attachedImage);
+
+  return imageContainer;
+}
+
+/**
+ * Creates the body element of a comment. Includes the comment text, the time
+ * posted, and the author.
+ * @param {Comment} comment
+ * @param {Element} commentRow The comment element that contains all other
+ * comment elements.
+ * @return Returns the comment body element.
+ */
+function createCommentBodyElement(comment, commentRow) {
   const newComment = document.createElement("div");
-  newComment.classList.add("p-4", "border-bottom");
+  newComment.classList.add("p-4");
   newComment.innerText = comment.commentBody;
 
   const authorFooter = document.createElement("footer");
@@ -165,19 +209,30 @@ function addCommentToPage(comment) {
   if (commentAuthData && 
       commentAuthData.authorized && 
       commentAuthData.user.id === comment.posterId) {
-    const deleteButton = document.createElement("button");
-    deleteButton.classList.add("btn", "btn-muted", "btn-sm", "ml-2");
-    deleteButton.innerText = "Delete";
-    deleteButton.addEventListener(
-        "click", 
-        createCommentDeleter(comment.id, newComment));
-
+    const deleteButton = getCommentDeleteButton(comment, commentRow);
     authorFooter.appendChild(deleteButton);
   }
 
   newComment.appendChild(authorFooter);
 
-  commentContainer.appendChild(newComment);
+  return newComment;
+}
+
+/**
+ * Creates the delete button for a comment. 
+ * @param {Comment} comment
+ * @param {Element} commentRow
+ * @return Returns the comment delete button.
+ */
+function createCommentDeleteButton(comment, commentRow) {
+  const deleteButton = document.createElement("button");
+  deleteButton.classList.add("btn", "btn-muted", "btn-sm", "ml-2");
+  deleteButton.innerText = "Delete";
+  deleteButton.addEventListener(
+      "click", 
+      createCommentDeleter(comment.id, commentRow));
+
+  return deleteButton;
 }
 
 /**
