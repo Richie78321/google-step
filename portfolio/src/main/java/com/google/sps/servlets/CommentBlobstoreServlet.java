@@ -44,12 +44,10 @@ public class CommentBlobstoreServlet extends HttpServlet {
   private Gson gson = new Gson();
 
   /** 
-   * Returns a URL that points to the image uploaded with a request. The URL is null if no file
-   * was uploaded or the file uploaded was not an image. If the file is not an image, the blobstore
-   * entry is removed to save space.
+   * Returns a URL that points to the image associated with a BlobKey.
    * 
-   * @param request
-   * @return Returns a URL that points to the image uploaded or null.
+   * @param blobKey
+   * @return Returns a URL that points to the image associated with the BlobKey.
    */
   public static String getUploadedImageURL(BlobKey blobKey) {
     ImagesService imagesService = ImagesServiceFactory.getImagesService();
@@ -65,7 +63,14 @@ public class CommentBlobstoreServlet extends HttpServlet {
       return imagesService.getServingUrl(options);
     }
   }
-
+  
+  /**
+   * Removes an uploaded image associated with a BlobKey.
+   * Removes the image from the ImageService as well as the Blobstore.
+   *
+   * @param blobKey
+   * @return Returns whether or not the uploaded image was removed successfully.
+   */
   public static boolean removeUploadedImage(BlobKey blobKey) {
     ImagesService imagesService = ImagesServiceFactory.getImagesService();
     try {
@@ -79,7 +84,16 @@ public class CommentBlobstoreServlet extends HttpServlet {
 
     return true;
   }
-
+  
+  /**
+   * Gets the BlobKey associated with an image uploaded with the request. Returns null
+   * if no file was uploaded or the file uploaded was not an image.
+   *
+   * @param request
+   * @param formInputName The property name of the image file from the request. This is also most
+   * likely the name of the input element for the file on the comment posting form.
+   * @return Returns the BlobKey for the uploaded image or null.
+   */
   public static BlobKey getUploadedImageBlobKey(HttpServletRequest request, String formInputName) {
     BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
     Map<String, List<BlobKey>> blobs = blobstoreService.getUploads(request);
