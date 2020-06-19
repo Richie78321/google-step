@@ -157,6 +157,48 @@ function addCommentToPage(comment) {
   const commentRow = document.createElement("div");
   commentRow.classList.add("row", "align-items-end", "border-bottom");
   
+  const commentBodyElement = getCommentBodyElement(comment, commentRow);
+  if (comment.attachedImageUrl) {
+    const commentAttachedImage = getCommentAttachedImage(comment);
+    commentAttachedImage.classList.add("col-sm-3");
+
+    commentBodyElement.classList.add("col-sm-9");
+
+    commentRow.appendChild(commentAttachedImage);
+    commentRow.appendChild(commentBodyElement);
+  } else {
+    commentRow.appendChild(commentBodyElement);
+  }
+
+  commentContainer.appendChild(commentRow);
+}
+
+/**
+ * Creates the attached image element for a comment.
+ * @param {Comment} comment
+ * @return {Element} Returns the image element.
+ */
+function createCommentAttachedImage(comment) {
+  const attachedImage = document.createElement("img");
+  attachedImage.src = comment.attachedImageUrl;
+  attachedImage.classList.add("img-thumbnail", "comment-image", "my-2");
+
+  const imageContainer = document.createElement("div");
+  imageContainer.classList.add("d-flex", "justify-content-center");
+  imageContainer.appendChild(attachedImage);
+
+  return imageContainer;
+}
+
+/**
+ * Creates the body element of a comment. Includes the comment text, the time
+ * posted, and the author.
+ * @param {Comment} comment
+ * @param {Element} commentRow The comment element that contains all other
+ * comment elements.
+ * @return Returns the comment body element.
+ */
+function createCommentBodyElement(comment, commentRow) {
   const newComment = document.createElement("div");
   newComment.classList.add("p-4");
   newComment.innerText = comment.commentBody;
@@ -169,36 +211,30 @@ function addCommentToPage(comment) {
   if (commentAuthData && 
       commentAuthData.authorized && 
       commentAuthData.user.id === comment.posterId) {
-    const deleteButton = document.createElement("button");
-    deleteButton.classList.add("btn", "btn-muted", "btn-sm", "ml-2");
-    deleteButton.innerText = "Delete";
-    deleteButton.addEventListener(
-        "click", 
-        createCommentDeleter(comment.id, commentRow));
-
+    const deleteButton = getCommentDeleteButton(comment, commentRow);
     authorFooter.appendChild(deleteButton);
   }
 
   newComment.appendChild(authorFooter);
 
-  if (comment.attachedImageUrl) {
-    const attachedImage = document.createElement("img");
-    attachedImage.src = comment.attachedImageUrl;
-    attachedImage.classList.add("img-thumbnail", "comment-image", "my-2");
+  return newComment;
+}
 
-    const imageColumn = document.createElement("div");
-    imageColumn.classList.add("col-sm-3", "d-flex", "justify-content-center");
-    imageColumn.appendChild(attachedImage);
+/**
+ * Creates the delete button for a comment. 
+ * @param {Comment} comment
+ * @param {Element} commentRow
+ * @return Returns the comment delete button.
+ */
+function createCommentDeleteButton(comment, commentRow) {
+  const deleteButton = document.createElement("button");
+  deleteButton.classList.add("btn", "btn-muted", "btn-sm", "ml-2");
+  deleteButton.innerText = "Delete";
+  deleteButton.addEventListener(
+      "click", 
+      createCommentDeleter(comment.id, commentRow));
 
-    const commentColumn = document.createElement("div");
-    commentColumn.classList.add("col-sm-9");
-    commentColumn.appendChild(newComment);
-
-    commentRow.appendChild(imageColumn);
-  }
-
-  commentRow.appendChild(newComment);
-  commentContainer.appendChild(commentRow);
+  return deleteButton;
 }
 
 /**
