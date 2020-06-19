@@ -165,11 +165,9 @@ function addCommentToPage(comment) {
     commentBodyElement.classList.add("col-sm-9");
 
     commentRow.appendChild(commentAttachedImage);
-    commentRow.appendChild(commentBodyElement);
-  } else {
-    commentRow.appendChild(commentBodyElement);
   }
-
+  
+  commentRow.appendChild(commentBodyElement);
   commentContainer.appendChild(commentRow);
 }
 
