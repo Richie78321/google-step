@@ -145,6 +145,7 @@ function removeCommentsOnPage() {
  * @property {number} id
  * @property {number} timePosted Time the comment was posted in unix timestamp.
  * @property {string} posterId
+ * @property {string} attachedImageUrl
  */
 /**
  * Adds a comment to the comments section UI.
@@ -153,8 +154,11 @@ function removeCommentsOnPage() {
 function addCommentToPage(comment) {
   const commentContainer = document.getElementById("comment-container");
   
+  const commentRow = document.createElement("div");
+  commentRow.classList.add("row", "align-items-end", "border-bottom");
+  
   const newComment = document.createElement("div");
-  newComment.classList.add("p-4", "border-bottom");
+  newComment.classList.add("p-4");
   newComment.innerText = comment.commentBody;
 
   const authorFooter = document.createElement("footer");
@@ -170,14 +174,31 @@ function addCommentToPage(comment) {
     deleteButton.innerText = "Delete";
     deleteButton.addEventListener(
         "click", 
-        createCommentDeleter(comment.id, newComment));
+        createCommentDeleter(comment.id, commentRow));
 
     authorFooter.appendChild(deleteButton);
   }
 
   newComment.appendChild(authorFooter);
 
-  commentContainer.appendChild(newComment);
+  if (comment.attachedImageUrl) {
+    const attachedImage = document.createElement("img");
+    attachedImage.src = comment.attachedImageUrl;
+    attachedImage.classList.add("img-thumbnail", "comment-image", "my-2");
+
+    const imageColumn = document.createElement("div");
+    imageColumn.classList.add("col-sm-3", "d-flex", "justify-content-center");
+    imageColumn.appendChild(attachedImage);
+
+    const commentColumn = document.createElement("div");
+    commentColumn.classList.add("col-sm-9");
+    commentColumn.appendChild(newComment);
+
+    commentRow.appendChild(imageColumn);
+  }
+
+  commentRow.appendChild(newComment);
+  commentContainer.appendChild(commentRow);
 }
 
 /**
