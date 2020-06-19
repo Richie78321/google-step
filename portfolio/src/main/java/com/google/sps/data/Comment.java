@@ -16,6 +16,7 @@ package com.google.sps.data;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.sps.helper.ValidationResult;
+import com.google.sps.servlets.CommentBlobstoreServlet;
 import com.google.sps.servlets.DataServlet;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ public final class Comment {
   public static final String BODY_KEY = "comment-body";
   public static final String TIME_POSTED_KEY = "timePosted";
   public static final String POSTER_ID_KEY = "posterId";
+  public static final String ATTACHED_IMAGE_URL_KEY = "attachedImageUrl";
   
   /**
    * Get and validate a comment object from an incoming request.
@@ -49,7 +51,10 @@ public final class Comment {
     if (validationError != null) {
       return new ValidationResult<Comment>(validationError);
     } else {
-      Comment newComment = new Comment(commentAuthor, commentBody, posterId);
+      String attachedImageUrl = 
+          CommentBlobstoreServlet.getUploadedImageURL(request, "attachedImage");
+
+      Comment newComment = new Comment(commentAuthor, commentBody, posterId, attachedImageUrl);
       return new ValidationResult<Comment>(newComment);
     }
   }
@@ -81,18 +86,22 @@ public final class Comment {
   private long id;
   private final long timePosted;
   private final String posterId;
+  private final String attachedImageUrl;
 
   /**
     * Creates a new comment object.
     * @param author The author of the comment.
     * @param commentBody The text body of the comment.
+    * @param posterId The ID of the user that posted the comment.
+    * @param attachedImageUrl The URL to the image attached with the comment or null if no image.
     */
-  public Comment(String author, String commentBody, String posterId) {
+  public Comment(String author, String commentBody, String posterId, String attachedImageUrl) {
     this.author = author;
     this.commentBody = commentBody;
     this.id = -1;
     this.timePosted = System.currentTimeMillis();
     this.posterId = posterId;
+    this.attachedImageUrl = attachedImageUrl;
   }
   
   /**
@@ -105,6 +114,7 @@ public final class Comment {
     this.commentBody = (String) commentEntity.getProperty(BODY_KEY);
     this.timePosted = (long) commentEntity.getProperty(TIME_POSTED_KEY);
     this.posterId = (String) commentEntity.getProperty(POSTER_ID_KEY);
+    this.attachedImageUrl = (String) commentEntity.getProperty(ATTACHED_IMAGE_URL_KEY);
   }
 
   /**
@@ -116,6 +126,7 @@ public final class Comment {
     commentEntity.setProperty(BODY_KEY, commentBody);
     commentEntity.setProperty(TIME_POSTED_KEY, timePosted);
     commentEntity.setProperty(POSTER_ID_KEY, posterId);
+    commentEntity.setProperty(ATTACHED_IMAGE_URL_KEY, attachedImageUrl);
   }
 
   public String getAuthor() {
@@ -136,6 +147,10 @@ public final class Comment {
 
   public long getTimePosted() {
     return timePosted;
+  }
+
+  public String getAttachedImageUrl() {
+    return attachedImageUrl;
   }
 
   public void setId(long id) {

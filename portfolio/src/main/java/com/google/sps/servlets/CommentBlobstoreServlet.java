@@ -19,9 +19,16 @@ import com.google.appengine.api.blobstore.BlobInfoFactory;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
+import com.google.appengine.api.images.ImagesService;
+import com.google.appengine.api.images.ImagesServiceFactory;
+import com.google.appengine.api.images.ServingUrlOptions;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -62,7 +69,8 @@ public class CommentBlobstoreServlet extends HttpServlet {
     // User submitted form without selecting a file, so we can't get a URL. (live server)
     // Or the user submitted a file but the file is not an image.
     BlobInfo blobInfo = new BlobInfoFactory().loadBlobInfo(blobKey);
-    if (blobInfo.getSize() == 0 || !blobInfo.getContentType().equals("image")) {
+    
+    if (blobInfo.getSize() == 0 || !blobInfo.getContentType().startsWith("image/")) {
       blobstoreService.delete(blobKey);
       return null;
     }
