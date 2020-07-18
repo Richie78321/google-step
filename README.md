@@ -1,4 +1,3 @@
-# Google Student Training in Engineering Program -- First Half
+# Google STEP -- 5-Week Training Program
 
-This repo contains Richie's portfolio and STEP projects for the first half of the STEP program.
-Feel free to look around! I'll be trying my best to make these projects my own.
+This repo contains Richie's portfolio and STEP training projects for the first half of the Google STEP program.
